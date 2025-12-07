@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BTD6 Strategy Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #141a33;
+      --accent: #ffcc33;
+      --accent-soft: rgba(255, 204, 51, 0.15);
+      --accent-strong: #ffdb4d;
+      --text: #f5f7ff;
+      --text-muted: #a5afd3;
+      --danger: #ff6b6b;
+      --chip-bg: rgba(255, 255, 255, 0.06);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1c264d 0, #050814 55%, #000 100%);
+      color: var(--text);
+    }
+
+    .app-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 10px 36px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header h1 span.logo-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff 0, #ffe27a 30%, #ff9a3c 65%, #ff3c3c 100%);
+      box-shadow: 0 0 18px rgba(255, 204, 51, 0.9);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      border: 1px solid var(--border-subtle);
+      background: rgba(10, 16, 34, 0.9);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pill strong {
+      color: var(--accent-strong);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin: 16px 0 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      background: rgba(8, 10, 24, 0.9);
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.07s;
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #ffcc33, #ff9a3c);
+      border-color: transparent;
+      color: #1b1300;
+      font-weight: 600;
+    }
+
+    .tab-btn span.emoji {
+      font-size: 1.1rem;
+    }
+
+    .panel {
+      display: none;
+      background: rgba(8, 12, 30, 0.94);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      padding: 14px 14px 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    select, .fake-multiselect {
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(5, 8, 23, 0.9);
+      color: var(--text);
+      padding: 7px 9px;
+      font-size: 0.9rem;
+      outline: none;
+      width: 100%;
+    }
+
+    select:focus, .fake-multiselect:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 204, 51, 0.6);
+    }
+
+    .fake-multiselect {
+      min-height: 38px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      cursor: text;
+    }
+
+    .fake-multiselect input {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.88rem;
+      min-width: 60px;
+      flex: 1;
+    }
+
+    .chip {
+      border-radius: var(--radius-pill);
+      background: var(--chip-bg);
+      padding: 3px 8px;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chip button {
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0;
+    }
+
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      background: rgba(5, 8, 23, 0.9);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .toggle input {
+      accent-color: var(--accent);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .meta-row span.badge {
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .results {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 11px;
+      background: radial-gradient(circle at top left, rgba(255, 204, 51, 0.09), rgba(5, 8, 18, 0.96));
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .result-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .result-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .tier-pill {
+      border-radius: var(--radius-pill);
+      padding: 2px 7px;
+      font-size: 0.78rem;
+      border: 1px solid var(--accent);
+      color: var(--accent-strong);
+      background: rgba(255, 204, 51, 0.08);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 0.78rem;
+    }
+
+    .tags .tag {
+      border-radius: var(--radius-pill);
+      padding: 2px 6px;
+      background: var(--chip-bg);
+      color: var(--text-muted);
+    }
+
+    .tower-list {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 0.82rem;
+    }
+
+    .tower-list li {
+      margin: 1px 0;
+    }
+
+    .phase-label {
+      font-size: 0.78rem;
+      color: var(--accent-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .empty-state {
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(5, 9, 20, 0.9);
+      border: 1px dashed var(--border-subtle);
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .badge-danger {
+      color: var(--danger);
+    }
+
+    .browse-group {
+      margin-bottom: 16px;
+    }
+
+    .browse-group h3 {
+      font-size: 1rem;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .browse-group h3 span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .browse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+    }
+
+    .small {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+      .panel {
+        padding: 12px;
+      }
+      .result-card {
+        padding: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header>
+    <h1>
+      <span class="logo-dot"></span>
+      BTD6 Strategy Planner
+    </h1>
+    <p>
+      Pick your hero, map, and mode to get a short list of solid, low-micro strategies. 
+      You can optionally include spicy micro stuff (Corvus, Geraldo, temple sacs) with a toggle.
+    </p>
+    <div class="pill-row">
+      <div class="pill"><strong>Meta scope:</strong> v50–52 community consensus (Reddit, Discord, YouTube, wiki)</div>
+      <div class="pill">Bias toward <strong>no-ability / low-micro</strong> CHIMPS &amp; Impoppable strats</div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="finder">
+      <span class="emoji">🎯</span> Strategy Finder
+    </button>
+    <button class="tab-btn" data-tab="browse">
+      <span class="emoji">📚</span> Browse All Strats
+    </button>
+  </div>
+
+  <!-- Strategy Finder Panel -->
+  <section class="panel active" id="panel-finder">
+    <div class="filter-grid">
+      <div class="field">
+        <label for="hero-input">Hero (multi-select)</label>
+        <div class="fake-multiselect" id="hero-multi">
+          <!-- chips injected here -->
+          <input id="hero-input" type="text" placeholder="Type hero name…" autocomplete="off" />
+        </div>
+        <div class="small">Leave empty for “any hero”. Type to add (Sauda, Brickell, Obyn, etc.).</div>
+      </div>
+
+      <div class="field">
+        <label for="map-select">Map</label>
+        <select id="map-select">
+          <option value="">Any map</option>
+        </select>
+        <div class="small">Includes all standard BTD6 maps (v48.x list). Secret maps included as “Other”.</div>
+      </div>
+
+      <div class="field">
+        <label for="mission-select">Mode / Mission</label>
+        <select id="mission-select">
+          <option value="">Any hard-ish mode</option>
+          <option value="chimps">C.H.I.M.P.S.</option>
+          <option value="impoppable">Impoppable</option>
+          <option value="hard">Standard Hard / Alt Rounds</option>
+          <option value="boss">Boss / Elite</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle">
+        <input type="checkbox" id="water-toggle" />
+        <span>🌊 Treat as water-heavy map (enable Brickell / carrier / subs strats)</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="micro-toggle" />
+        <span>⚙️ Include high-micro setups (Corvus, Geraldo shop, temple sacrifices)</span>
+      </label>
+    </div>
+
+    <div class="meta-row">
+      <span class="badge">Tip: You can filter by hero only, or map only, or both.</span>
+      <span class="small" id="match-count"></span>
+    </div>
+
+    <div class="results" id="results"></div>
+  </section>
+
+  <!-- Browse Panel -->
+  <section class="panel" id="panel-browse">
+    <div class="browse-group">
+      <h3>S-Tier anchors <span>(very reliable even on most advanced / expert maps)</span></h3>
+      <div class="browse-grid" id="browse-s"></div>
+    </div>
+    <div class="browse-group">
+      <h3>A-Tier workhorses <span>(strong but a bit more map / hero dependent)</span></h3>
+      <div class="browse-grid" id="browse-a"></div>
+    </div>
+    <div class="browse-group">
+      <h3>B-Tier situational picks <span>(great on the right map or for variety)</span></h3>
+      <div class="browse-grid" id="browse-b"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  /********************
+   * DATA DEFINITIONS *
+   ********************/
+
+  const HEROES = [
+    "Sauda",
+    "Obyn",
+    "Admiral Brickell",
+    "Gwendolin",
+    "Geraldo",
+    "Corvus",
+    "Etienne",
+    "Pat Fusty",
+    "Psi",
+    "Adora",
+    "Benjamin",
+    "None"
+  ];
+
+  // BTD6 maps (v48.x list). Difficulty & hasWater approximated for filtering.
+  const MAPS = [
+    // Beginner
+    { name: "Monkey Meadow", difficulty: "Beginner", hasWater: false },
+    { name: "In The Loop", difficulty: "Beginner", hasWater: true },
+    { name: "Middle of the Road", difficulty: "Beginner", hasWater: false },
+    { name: "Tree Stump", difficulty: "Beginner", hasWater: false },
+    { name: "Town Center", difficulty: "Beginner", hasWater: false },
+    { name: "One Two Tree", difficulty: "Beginner", hasWater: false },
+    { name: "Scrapyard", difficulty: "Beginner", hasWater: false },
+    { name: "The Cabin", difficulty: "Beginner", hasWater: false },
+    { name: "Resort", difficulty: "Beginner", hasWater: true },
+    { name: "Tinkerton", difficulty: "Beginner", hasWater: false },
+    { name: "Skates", difficulty: "Beginner", hasWater: true },
+    { name: "Lotus Island", difficulty: "Beginner", hasWater: true },
+    { name: "Candy Falls", difficulty: "Beginner", hasWater: true },
+    { name: "Winter Park", difficulty: "Beginner", hasWater: false },
+    { name: "Carved", difficulty: "Beginner", hasWater: false },
+    { name: "Park Path", difficulty: "Beginner", hasWater: false },
+    { name: "Alpine Run", difficulty: "Beginner", hasWater: false },
+    { name: "Frozen Over", difficulty: "Beginner", hasWater: true },
+    { name: "Cubism", difficulty: "Beginner", hasWater: false },
+    { name: "Four Circles", difficulty: "Beginner", hasWater: false },
+    { name: "Hedge", difficulty: "Beginner", hasWater: false },
+    { name: "End of the Road", difficulty: "Beginner", hasWater: false },
+    { name: "Logs", difficulty: "Beginner", hasWater: false },
+    { name: "Spa Pits", difficulty: "Beginner", hasWater: true },
+    { name: "Three Mines 'Round", difficulty: "Beginner", hasWater: false },
+
+    // Intermediate
+    { name: "Lost Crevasse", difficulty: "Intermediate", hasWater: false },
+    { name: "Sulfur Springs", difficulty: "Intermediate", hasWater: true },
+    { name: "Luminous Cove", difficulty: "Intermediate", hasWater: true },
+    { name: "Water Park", difficulty: "Intermediate", hasWater: true },
+    { name: "Polyphemus", difficulty: "Intermediate", hasWater: true },
+    { name: "Covered Garden", difficulty: "Intermediate", hasWater: false },
+    { name: "Quarry", difficulty: "Intermediate", hasWater: false },
+    { name: "Quiet Street", difficulty: "Intermediate", hasWater: false },
+    { name: "Bloonarius Prime", difficulty: "Intermediate", hasWater: false },
+    { name: "Balance", difficulty: "Intermediate", hasWater: false },
+    { name: "Encrypted", difficulty: "Intermediate", hasWater: false },
+    { name: "Bazaar", difficulty: "Intermediate", hasWater: true },
+    { name: "Adora's Temple", difficulty: "Intermediate", hasWater: false },
+    { name: "Spring Spring", difficulty: "Intermediate", hasWater: false },
+    { name: "KartsNDarts", difficulty: "Intermediate", hasWater: false },
+    { name: "Moon Landing", difficulty: "Intermediate", hasWater: false },
+    { name: "Haunted", difficulty: "Intermediate", hasWater: false },
+    { name: "Downstream", difficulty: "Intermediate", hasWater: true },
+    { name: "Firing Range", difficulty: "Intermediate", hasWater: false },
+    { name: "Cracked", difficulty: "Intermediate", hasWater: false },
+    { name: "Streambed", difficulty: "Intermediate", hasWater: true },
+    { name: "Chutes", difficulty: "Intermediate", hasWater: false },
+    { name: "Rake", difficulty: "Intermediate", hasWater: false },
+    { name: "Spice Islands", difficulty: "Intermediate", hasWater: true },
+
+    // Advanced
+    { name: "Sunset Gulch", difficulty: "Advanced", hasWater: false },
+    { name: "Enchanted Glade", difficulty: "Advanced", hasWater: false },
+    { name: "Last Resort", difficulty: "Advanced", hasWater: true },
+    { name: "Ancient Portal", difficulty: "Advanced", hasWater: false },
+    { name: "Castle Revenge", difficulty: "Advanced", hasWater: false },
+    { name: "Dark Path", difficulty: "Advanced", hasWater: false },
+    { name: "Erosion", difficulty: "Advanced", hasWater: false },
+    { name: "Midnight Mansion", difficulty: "Advanced", hasWater: false },
+    { name: "Sunken Columns", difficulty: "Advanced", hasWater: true },
+    { name: "X Factor", difficulty: "Advanced", hasWater: false },
+    { name: "Mesa", difficulty: "Advanced", hasWater: false },
+    { name: "Geared", difficulty: "Advanced", hasWater: false },
+    { name: "Spillway", difficulty: "Advanced", hasWater: true },
+    { name: "Cargo", difficulty: "Advanced", hasWater: true },
+    { name: "Pat's Pond", difficulty: "Advanced", hasWater: true },
+    { name: "Peninsula", difficulty: "Advanced", hasWater: true },
+    { name: "High Finance", difficulty: "Advanced", hasWater: false },
+    { name: "Another Brick", difficulty: "Advanced", hasWater: false },
+    { name: "Off The Coast", difficulty: "Advanced", hasWater: true },
+    { name: "Cornfield", difficulty: "Advanced", hasWater: false },
+    { name: "Underground", difficulty: "Advanced", hasWater: false },
+
+    // Expert
+    { name: "Glacial Trail", difficulty: "Expert", hasWater: false },
+    { name: "Dark Dungeons", difficulty: "Expert", hasWater: false },
+    { name: "Sanctuary", difficulty: "Expert", hasWater: false },
+    { name: "Ravine", difficulty: "Expert", hasWater: false },
+    { name: "Flooded Valley", difficulty: "Expert", hasWater: true },
+    { name: "Infernal", difficulty: "Expert", hasWater: false },
+    { name: "Bloody Puddles", difficulty: "Expert", hasWater: false },
+    { name: "Workshop", difficulty: "Expert", hasWater: false },
+    { name: "Quad", difficulty: "Expert", hasWater: false },
+    { name: "Dark Castle", difficulty: "Expert", hasWater: false },
+    { name: "Muddy Puddles", difficulty: "Expert", hasWater: false },
+    { name: "#Ouch", difficulty: "Expert", hasWater: false },
+
+    // Challenge-editor specials (treated as Expert-ish)
+    { name: "Blons", difficulty: "Expert", hasWater: false },
+    { name: "Protect The Yacht", difficulty: "Intermediate", hasWater: true }
+  ];
+
+  /**
+   * Strategies
+   *  - tier: "S" | "A" | "B"
+   *  - hero: hero name or "None"
+   *  - microHeavy: true if Corvus/Geraldo/temple stuff / tight micro
+   *  - missionTags: ["chimps","impoppable","hard","boss"]
+   *  - mapTags: rough descriptors for scoring
+   *  - waterPreferred: "any" | "needs_water" | "land_only"
+   *  - recommendedMaps: list of map names
+   */
+  const STRATEGIES = [
+    /* ========= S-Tier anchors ========= */
+
+    {
+      id: "sauda-logs-poplust",
+      name: "Sauda Forest Poplust Core",
+      tier: "S",
+      hero: "Sauda",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable", "hard"],
+      mapTags: ["beginner", "single_path", "curvy"],
+      waterPreferred: "any",
+      recommendedMaps: ["Logs", "Hedge", "Tree Stump", "Monkey Meadow"],
+      summary: "Sauda + Poplust druids with Alch/Village support. Very low micro, great on short curved lanes.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Place Sauda in a high-traffic bend; add 0-0-0 Dart(s) if needed to stabilize."
+        },
+        {
+          phase: "early",
+          desc: "2-0-0 Alchemist near Sauda (then 3-0-1), set to Strong for lead + damage."
+        },
+        {
+          phase: "mid",
+          desc: "Stack 4–6 0-2-4 Druids (Poplust) in a cluster within Obyn/Village radius if used."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-2 Druid of the Jungle for stray leaks and anti-camouflage with support."
+        },
+        {
+          phase: "late",
+          desc: "0-2-5 Ice (Super Brittle) or 2-0-5 Glue (Relentless/ Moab Glue) and 0-2-4 Village (Jungle Drums + Camo)."
+        }
+      ]
+    },
+
+    {
+      id: "obyn-druid-forest",
+      name: "Obyn Poplust Grove",
+      tier: "S",
+      hero: "Obyn",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["beginner", "intermediate", "multi_path"],
+      waterPreferred: "any",
+      recommendedMaps: ["Cubism", "End of the Road", "Spa Pits"],
+      summary: "Classic Obyn + Poplust circle with Super Brittle + Permaspike safety net.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Open with Obyn in a central overlap; add 0-0-0 Dart for help until lvl 3."
+        },
+        {
+          phase: "mid",
+          desc: "5x 0-2-4 Poplust Druids in a clump, all in Obyn's buff radius."
+        },
+        {
+          phase: "mid",
+          desc: "3-0-0 Alch near the Druid ball, then 4-0-1 (Strong target)."
+        },
+        {
+          phase: "late",
+          desc: "0-2-5 Ice on a key bend (Super Brittle) and 0-2-4 Village (Jungle Drums + Camo)."
+        },
+        {
+          phase: "late",
+          desc: "0-2-5 Spike Factory at back (Permaspike) for safety on rounds 95–100."
+        }
+      ]
+    },
+
+    {
+      id: "dark-castle-poplust-permaspike",
+      name: "Obyn Dark Castle Poplust + Permaspike",
+      tier: "S",
+      hero: "Obyn",
+      microHeavy: false,
+      missionTags: ["chimps"],
+      mapTags: ["expert", "long", "multi_path"],
+      waterPreferred: "any",
+      recommendedMaps: ["Dark Castle", "Muddy Puddles"],
+      summary: "Community-favored low-micro Dark Castle CHIMPS: Obyn + 6 Poplust + Permaspike backline.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Obyn on the main intersection. Support with a 0-0-0 Dart and 0-0-0 Ninja if needed."
+        },
+        {
+          phase: "mid",
+          desc: "6x 0-2-4 Poplust Druids in Obyn radius. Add 3-0-0 → 4-0-1 Alch on Strong."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-3 Wizard for decamo and cleanup, upgraded later to 0-2-5 (Prince of Darkness) if desired."
+        },
+        {
+          phase: "late",
+          desc: "0-2-5 Spike Factory at the end of the final lane for r95–100 insurance."
+        },
+        {
+          phase: "late",
+          desc: "0-2-4 Village over core (Jungle Drums + MIB) if bloon types demand it."
+        }
+      ]
+    },
+
+    {
+      id: "brickell-flooded-flagship",
+      name: "Brickell Flooded Valley Flagship Fleet",
+      tier: "S",
+      hero: "Admiral Brickell",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["expert", "water_heavy"],
+      waterPreferred: "needs_water",
+      recommendedMaps: ["Flooded Valley", "Off The Coast", "Spice Islands", "Peninsula"],
+      summary: "Brickell + Carrier Flagship + Sub core, based on recent no-micro Flooded Valley CHIMPS guides (Update 52.1).",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "0-0-0 Sub on a curve (Strong). Add a second 0-0-0 Sub quickly to stabilize."
+        },
+        {
+          phase: "mid",
+          desc: "Place Brickell where mines cover key path entries. Upgrade main Sub toward 2-0-4 then 2-0-5 (Pre-emptive/First Strike depending on comfort)."
+        },
+        {
+          phase: "mid",
+          desc: "Buy 0-0-4 → 2-0-5 Monkey Buccaneer (Carrier Flagship) as main damage carrier."
+        },
+        {
+          phase: "late",
+          desc: "Add 0-2-4 Village over fleet (Jungle + Camo), then 0-3-2 Sub(s) for extra BAD damage."
+        },
+        {
+          phase: "late",
+          desc: "Optionally place 0-2-5 Ice on frozen water edges for extra control if land slots are tight."
+        }
+      ]
+    },
+
+    {
+      id: "ravine-sauda-archmage-brew",
+      name: "Sauda Ravine Archmage + PermaBrew",
+      tier: "S",
+      hero: "Sauda",
+      microHeavy: false,
+      missionTags: ["chimps"],
+      mapTags: ["expert", "tight_vision"],
+      waterPreferred: "any",
+      recommendedMaps: ["Ravine"],
+      summary: "Sauda carries early; Archmage + PermaBrew do heavy lifting as showcased in low-micro Ravine guides.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Place Sauda on the sword-adjacent intersection so she hits both upper and lower passes. Use the Ravine sword tap mechanic on r6–7."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-3 Wizard into 0-2-5 Archmage in a central, multi-pass spot."
+        },
+        {
+          phase: "mid",
+          desc: "3-0-0 Alch → 4-0-1 → 5-0-2 PermaBrew covering Sauda + Archmage."
+        },
+        {
+          phase: "late",
+          desc: "0-2-4 Village (Jungle + Camo) over the main cluster and a 0-2-5 Ice (Super Brittle) on a shared straight line."
+        },
+        {
+          phase: "late",
+          desc: "Add 0-0-5 Spike Factory at the end if you want extra safety on r95–100."
+        }
+      ]
+    },
+
+    {
+      id: "gwen-ouch-low-micro",
+      name: "Gwendolin #Ouch Firestorm",
+      tier: "S",
+      hero: "Gwendolin",
+      microHeavy: false,
+      missionTags: ["chimps"],
+      mapTags: ["expert", "multi_path"],
+      waterPreferred: "any",
+      recommendedMaps: ["#Ouch"],
+      summary: "Inspired by recent “easiest #Ouch CHIMPS, no abilities/micro” runs: layered spike/Alch/bomb with Gwen’s passive burn.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Place Gwen where she can hit all four lanes. Supplement with 0-0-0 Darts to handle split openings."
+        },
+        {
+          phase: "mid",
+          desc: "Build 2-0-3 Bomb Shooters on key corners for MOAB shred, supported by 3-0-0 → 4-0-1 Alch."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-5 Glue (glue storm line) or at least 2-0-4 Glue on Strong to slow big clumps."
+        },
+        {
+          phase: "late",
+          desc: "0-2-5 Spike Factory at the central exit; then add 0-2-4 Village to cover core towers."
+        },
+        {
+          phase: "late",
+          desc: "If money allows, add 0-2-5 Ice near exit for extra stall into the spikes."
+        }
+      ]
+    },
+
+    /* ========= A-Tier solid options ========= */
+
+    {
+      id: "brickell-generic-water",
+      name: "Brickell Carrier Fleet (Generic Water Maps)",
+      tier: "A",
+      hero: "Admiral Brickell",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable", "hard"],
+      mapTags: ["water_heavy"],
+      waterPreferred: "needs_water",
+      recommendedMaps: ["Spice Islands", "Off The Coast", "Peninsula", "Pat's Pond", "Resort"],
+      summary: "Brickell + Carrier Flagship + Subs; strong on almost any water-heavy track.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Open with 0-0-0 Sub(s) or 0-0-0 Boat depending on water position; get Brickell down once stable."
+        },
+        {
+          phase: "mid",
+          desc: "Rush 0-0-4 → 2-0-5 Carrier Flagship and a 2-0-4 Sub for MOABs."
+        },
+        {
+          phase: "late",
+          desc: "0-2-4 Village over fleet and optionally 0-0-5 Spike Factory for backline safety."
+        }
+      ]
+    },
+
+    {
+      id: "psi-slow-control",
+      name: "Psi Global Control Core",
+      tier: "A",
+      hero: "Psi",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["advanced", "expert", "multi_path"],
+      waterPreferred: "any",
+      recommendedMaps: ["Ravine", "Infernal", "Workshop"],
+      summary: "Psi’s global stun + strong slow/control core (Ice, Glue, Sniper) with low micro.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Start with a strong Dart/Ninja opening until Psi is affordable; place Psi centrally."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-5 Ice on main choke (Super Brittle) plus 2-0-5 Glue on Strong for MOAB slowdown."
+        },
+        {
+          phase: "late",
+          desc: "2-0-5 Sniper on Strong (Elite Sniper) for extra cash and MOAB damage; add Village as needed."
+        }
+      ]
+    },
+
+    {
+      id: "etienne-advanced-sky",
+      name: "Etienne Drone Sky Defense",
+      tier: "A",
+      hero: "Etienne",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["advanced", "multi_path"],
+      waterPreferred: "any",
+      recommendedMaps: ["High Finance", "Underground", "Another Brick"],
+      summary: "Etienne’s global drones plus a simple PoD or Sun Avatar core.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Dart + Ninja open, then drop Etienne in a safe spot as soon as affordable."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-5 Wizard (Prince of Darkness) or 2-0-3 Super → 2-0-4 Sun Avatar on long-sight tiles."
+        },
+        {
+          phase: "late",
+          desc: "Village for camo & damage boosts; small cluster of 0-2-4 Ninjas for cleanup."
+        }
+      ]
+    },
+
+    {
+      id: "nohero-dart-ninja-alch",
+      name: "No Hero Dart-Ninja-Alch Core",
+      tier: "A",
+      hero: "None",
+      microHeavy: false,
+      missionTags: ["chimps", "impoppable", "hard"],
+      mapTags: ["beginner", "intermediate"],
+      waterPreferred: "any",
+      recommendedMaps: ["Monkey Meadow", "Cubism", "Chutes"],
+      summary: "Hero-less, low-micro core focused on efficient Dart/Ninja/Alch fundamentals.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Triple Dart start or Dart + Ninja, positioned to hit long passes."
+        },
+        {
+          phase: "mid",
+          desc: "3-0-0 → 4-0-1 Alch on Strong buffing main damage tower (Ninja or Dart x-5)."
+        },
+        {
+          phase: "mid",
+          desc: "0-2-4 Ninja (Bloonjitsu) and 0-2-4 Wizard (Arcane Spike/PoD later) as core DPS."
+        },
+        {
+          phase: "late",
+          desc: "0-2-4 Village and 0-0-5 Spike Factory if track length allows."
+        }
+      ]
+    },
+
+    /* ========= Micro-heavy (toggled) ========= */
+
+    {
+      id: "corvus-abyss-water",
+      name: "Corvus Mermonkey Abyss",
+      tier: "A",
+      hero: "Corvus",
+      microHeavy: true,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["advanced", "expert", "water_heavy"],
+      waterPreferred: "needs_water",
+      recommendedMaps: ["Flooded Valley", "Spice Islands", "Off The Coast"],
+      summary: "Leans on Corvus’s mermonkey mechanics + Lord of the Abyss / Flagship; strong but shop/micro heavy.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Corvus down early with shop optimization; combine with 0-0-0 Sub or Boat to stabilize."
+        },
+        {
+          phase: "mid",
+          desc: "Focus Corvus shop usage to ramp water DPS (e.g., Lord of the Abyss / carrier synergies)."
+        },
+        {
+          phase: "late",
+          desc: "Round out with Village, Ice, and Glue as needed; expect some micro on shop items and placements."
+        }
+      ]
+    },
+
+    {
+      id: "geraldo-shop-utility",
+      name: "Geraldo Toolbox Control",
+      tier: "A",
+      hero: "Geraldo",
+      microHeavy: true,
+      missionTags: ["chimps", "impoppable", "hard"],
+      mapTags: ["any"],
+      waterPreferred: "any",
+      recommendedMaps: ["Most maps, esp. Beginner/Intermediate"],
+      summary: "Geraldo’s shop items (genie, pickle, totems) make almost anything work, but require active management.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Use Geraldo’s items (shooting nails, road items) to support cheap Dart/Ninja openings."
+        },
+        {
+          phase: "mid",
+          desc: "Layer in main DPS (PoD, Sun Avatar, or Plasma Fan) and buff with pickles / genie as needed."
+        },
+        {
+          phase: "late",
+          desc: "Totems, genies and shop refresh micro keep lategame healthy. Strong but attention-intensive."
+        }
+      ]
+    },
+
+    {
+      id: "adora-temple-sacrifices",
+      name: "Adora Sun Temple Sacrifice Core",
+      tier: "A",
+      hero: "Adora",
+      microHeavy: true,
+      missionTags: ["chimps", "impoppable"],
+      mapTags: ["advanced", "expert"],
+      waterPreferred: "land_only",
+      recommendedMaps: ["Adora's Temple", "Sanctuary", "Dark Castle"],
+      summary: "Classic Adora + Temple / True Sun God route with heavy sacrifice planning and positioning.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Adora in central high-coverage spot; support with efficient Darts/Ninjas."
+        },
+        {
+          phase: "mid",
+          desc: "Build a 3-0-0 → 5-0-0 Super Monkey (Temple) in a place that will later cover most track, planning sacrifice categories."
+        },
+        {
+          phase: "late",
+          desc: "Execute full Temple/Sun God sacrifices. High power, but requires pathing knowledge and micro."
+        }
+      ]
+    },
+
+    /* ========= B-Tier situational ========= */
+
+    {
+      id: "pat-sun-avatar-flooded",
+      name: "Pat Sun Avatar Flooded Valley",
+      tier: "B",
+      hero: "Pat Fusty",
+      microHeavy: false,
+      missionTags: ["chimps"],
+      mapTags: ["expert", "water_heavy"],
+      waterPreferred: "needs_water",
+      recommendedMaps: ["Flooded Valley"],
+      summary: "Pat knockback with Sun Avatar + support; viable alternate to Brickell on Flooded Valley.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Pat near central path intersection so his knockbacks cover both lanes."
+        },
+        {
+          phase: "mid",
+          desc: "2-0-4 Sun Avatar on top of main intersection; support with Alchemist & Village."
+        },
+        {
+          phase: "late",
+          desc: "Subs / Boats for extra BAD damage; 0-2-5 Ice if platforming allows."
+        }
+      ]
+    },
+
+    {
+      id: "gwen-boss-bombs",
+      name: "Gwen Boss Bomb Core",
+      tier: "B",
+      hero: "Gwendolin",
+      microHeavy: false,
+      missionTags: ["boss"],
+      mapTags: ["beginner", "intermediate"],
+      waterPreferred: "any",
+      recommendedMaps: ["Monkey Meadow", "Cubism", "Bloonarius Prime"],
+      summary: "Gwen + bombardment core. Great on bosses where pure MOAB damage is key and leak risk is low.",
+      keyTowers: [
+        {
+          phase: "early",
+          desc: "Gwen early; Dart/Ninja to help anti-leak waves."
+        },
+        {
+          phase: "mid",
+          desc: "2-0-4 Bomb Shooters and 0-2-3 Glue for boss slow; 4-0-2 Alchs for buffs."
+        },
+        {
+          phase: "late",
+          desc: "Village + extra Bombs / Tack Zone as needed for later boss tiers."
+        }
+      ]
+    }
+  ];
+
+  /*****************
+   * UI WIRES      *
+   *****************/
+
+  const heroInput = document.getElementById("hero-input");
+  const heroMulti = document.getElementById("hero-multi");
+  const mapSelect = document.getElementById("map-select");
+  const missionSelect = document.getElementById("mission-select");
+  const waterToggle = document.getElementById("water-toggle");
+  const microToggle = document.getElementById("micro-toggle");
+  const resultsEl = document.getElementById("results");
+  const matchCountEl = document.getElementById("match-count");
+
+  const browseBuckets = {
+    S: document.getElementById("browse-s"),
+    A: document.getElementById("browse-a"),
+    B: document.getElementById("browse-b")
+  };
+
+  let selectedHeroes = [];
+
+  // Populate map dropdown
+  function initMaps() {
+    const byDiff = { Beginner: [], Intermediate: [], Advanced: [], Expert: [], Other: [] };
+    MAPS.forEach(m => {
+      if (!byDiff[m.difficulty]) byDiff[m.difficulty] = [];
+      byDiff[m.difficulty].push(m);
+    });
+    for (const diff of ["Beginner", "Intermediate", "Advanced", "Expert"]) {
+      const groupMaps = byDiff[diff] || [];
+      if (!groupMaps.length) continue;
+      const optGroup = document.createElement("optgroup");
+      optGroup.label = diff;
+      groupMaps.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.name;
+        opt.textContent = m.name + (m.hasWater ? " 🌊" : "");
+        optGroup.appendChild(opt);
+      });
+      mapSelect.appendChild(optGroup);
+    }
+  }
+
+  function renderHeroChips() {
+    // Remove existing chips (but not the input)
+    heroMulti.querySelectorAll(".chip").forEach(ch => ch.remove());
+    selectedHeroes.forEach(hero => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = hero;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "×";
+      btn.addEventListener("click", () => {
+        selectedHeroes = selectedHeroes.filter(h => h !== hero);
+        renderHeroChips();
+        runFilter();
+      });
+      chip.appendChild(btn);
+      heroMulti.insertBefore(chip, heroInput);
+    });
+  }
+
+  function tryAddHeroFromInput() {
+    const raw = heroInput.value.trim();
+    if (!raw) return;
+    const match = HEROES.find(h => h.toLowerCase() === raw.toLowerCase());
+    if (match && !selectedHeroes.includes(match)) {
+      selectedHeroes.push(match);
+      renderHeroChips();
+      runFilter();
+    }
+    heroInput.value = "";
+  }
+
+  heroInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      tryAddHeroFromInput();
+    } else if (e.key === "Backspace" && !heroInput.value && selectedHeroes.length) {
+      // backspace when empty removes last hero
+      selectedHeroes.pop();
+      renderHeroChips();
+      runFilter();
+    }
+  });
+
+  heroInput.addEventListener("blur", () => {
+    tryAddHeroFromInput();
+  });
+
+  mapSelect.addEventListener("change", () => {
+    const name = mapSelect.value;
+    const mapObj = MAPS.find(m => m.name === name);
+    if (mapObj) {
+      waterToggle.checked = !!mapObj.hasWater;
+    }
+    runFilter();
+  });
+
+  missionSelect.addEventListener("change", runFilter);
+  waterToggle.addEventListener("change", runFilter);
+  microToggle.addEventListener("change", runFilter);
+
+  // Tab switching
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".panel").forEach(p => {
+        p.classList.toggle("active", p.id === "panel-" + tab);
+      });
+    });
+  });
+
+  /*****************
+   * FILTER LOGIC  *
+   *****************/
+
+  function mapForName(name) {
+    return MAPS.find(m => m.name === name) || null;
+  }
+
+  function strategyMatchesFilters(strategy) {
+    const missionFilter = missionSelect.value;
+    const selectedMapName = mapSelect.value;
+    const includeWaterOnly = waterToggle.checked;
+    const includeMicroHeavy = microToggle.checked;
+
+    if (!includeMicroHeavy && strategy.microHeavy) {
+      return false;
+    }
+
+    // Hero filter
+    if (selectedHeroes.length > 0) {
+      if (strategy.hero === "None") {
+        // allow only if "None" is explicitly selected
+        if (!selectedHeroes.includes("None")) return false;
+      } else if (!selectedHeroes.includes(strategy.hero)) {
+        return false;
+      }
+    }
+
+    // Mission filter
+    if (missionFilter && !strategy.missionTags.includes(missionFilter)) {
+      return false;
+    }
+
+    // Water filter: if checkbox off, hide strategies that really need water
+    if (!includeWaterOnly && strategy.waterPreferred === "needs_water") {
+      return false;
+    }
+
+    // Map filter is soft: we do NOT strictly require mapTags, but we can later score
+    if (selectedMapName) {
+      const mObj = mapForName(selectedMapName);
+      if (!mObj) return true;
+      // For “land_only” strategies, avoid purely water-only maps
+      if (strategy.waterPreferred === "land_only" && mObj.hasWater && (mObj.difficulty === "Advanced" || mObj.difficulty === "Expert")) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function scoreStrategy(strategy) {
+    let score = 0;
+    const missionFilter = missionSelect.value;
+    const selectedMapName = mapSelect.value;
+    const includeWaterOnly = waterToggle.checked;
+
+    // Tier weight
+    if (strategy.tier === "S") score += 4;
+    else if (strategy.tier === "A") score += 2;
+    else score += 1;
+
+    // Hero match bonus
+    if (selectedHeroes.length > 0) {
+      if (selectedHeroes.includes(strategy.hero)) score += 3;
+      else if (strategy.hero === "None") score += 1;
+    }
+
+    // Mission tag bonus
+    if (missionFilter && strategy.missionTags.includes(missionFilter)) {
+      score += 2;
+    }
+
+    // Map difficulty & type bonus
+    if (selectedMapName) {
+      const mObj = mapForName(selectedMapName);
+      if (mObj) {
+        if (mObj.difficulty === "Expert" && strategy.mapTags.includes("expert")) score += 3;
+        if (mObj.difficulty === "Advanced" && strategy.mapTags.includes("advanced")) score += 2;
+        if (mObj.difficulty === "Beginner" && strategy.mapTags.includes("beginner")) score += 1;
+        if (strategy.recommendedMaps && strategy.recommendedMaps.includes(selectedMapName)) {
+          score += 3;
+        }
+      }
+    }
+
+    // Water synergy bonus
+    if (includeWaterOnly && strategy.waterPreferred === "needs_water") {
+      score += 3;
+    }
+
+    return score;
+  }
+
+  function runFilter() {
+    const filtered = STRATEGIES.filter(strategyMatchesFilters);
+    const withScore = filtered.map(s => ({ s, score: scoreStrategy(s) }));
+    withScore.sort((a, b) => b.score - a.score);
+
+    const top = withScore.slice(0, 5).map(x => x.s);
+
+    renderResults(top, filtered.length);
+  }
+
+  function renderResults(strategies, totalMatches) {
+    resultsEl.innerHTML = "";
+    if (!strategies.length) {
+      const div = document.createElement("div");
+      div.className = "empty-state";
+      div.innerHTML = "No matching strategies yet. Try relaxing filters or toggling water / micro options.";
+      resultsEl.appendChild(div);
+      matchCountEl.textContent = "";
+      return;
+    }
+
+    matchCountEl.textContent = `${totalMatches} matching strategies, showing top ${strategies.length}`;
+
+    strategies.forEach(strategy => {
+      const card = document.createElement("article");
+      card.className = "result-card";
+
+      const header = document.createElement("div");
+      header.className = "result-header";
+
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "result-title";
+      titleWrap.innerHTML = `<span>${strategy.name}</span>`;
+
+      const subtitle = document.createElement("div");
+      subtitle.className = "result-subtitle";
+      subtitle.textContent = `${strategy.hero === "None" ? "No Hero" : strategy.hero} • Recommended: ${strategy.recommendedMaps.join(", ")}`;
+
+      const tier = document.createElement("span");
+      tier.className = "tier-pill";
+      tier.textContent = `${strategy.tier}-Tier`;
+
+      if (strategy.microHeavy) {
+        const mh = document.createElement("span");
+        mh.className = "tier-pill badge-danger";
+        mh.style.borderColor = "var(--danger)";
+        mh.style.background = "rgba(255,107,107,0.16)";
+        mh.textContent = "High-micro";
+        header.appendChild(mh);
+      }
+
+      header.appendChild(tier);
+      card.appendChild(titleWrap);
+      card.appendChild(subtitle);
+      card.appendChild(header);
+
+      if (strategy.summary) {
+        const p = document.createElement("p");
+        p.className = "small";
+        p.textContent = strategy.summary;
+        card.appendChild(p);
+      }
+
+      const tagsRow = document.createElement("div");
+      tagsRow.className = "tags";
+
+      const modeTag = document.createElement("span");
+      modeTag.className = "tag";
+      modeTag.textContent = `Modes: ${strategy.missionTags.join(", ")}`;
+      tagsRow.appendChild(modeTag);
+
+      if (strategy.mapTags && strategy.mapTags.length) {
+        const mapTag = document.createElement("span");
+        mapTag.className = "tag";
+        mapTag.textContent = `Map type: ${strategy.mapTags.join(" / ")}`;
+        tagsRow.appendChild(mapTag);
+      }
+
+      if (strategy.waterPreferred === "needs_water") {
+        const w = document.createElement("span");
+        w.className = "tag";
+        w.textContent = "Water-dependent";
+        tagsRow.appendChild(w);
+      }
+
+      card.appendChild(tagsRow);
+
+      // Tower phases
+      if (strategy.keyTowers && strategy.keyTowers.length) {
+        const phases = ["early", "mid", "late"];
+        phases.forEach(phase => {
+          const phaseItems = strategy.keyTowers.filter(t => t.phase === phase);
+          if (!phaseItems.length) return;
+          const label = document.createElement("div");
+          label.className = "phase-label";
+          label.textContent = phase.toUpperCase();
+          card.appendChild(label);
+
+          const ul = document.createElement("ul");
+          ul.className = "tower-list";
+          phaseItems.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = item.desc;
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+        });
+      }
+
+      resultsEl.appendChild(card);
+    });
+  }
+
+  /*****************
+   * BROWSE VIEW   *
+   *****************/
+
+  function renderBrowse() {
+    for (const tier of ["S", "A", "B"]) {
+      const container = browseBuckets[tier];
+      container.innerHTML = "";
+      const list = STRATEGIES.filter(s => s.tier === tier);
+      if (!list.length) {
+        container.innerHTML = '<div class="small">Nothing in this tier yet.</div>';
+        continue;
+      }
+      list.forEach(strategy => {
+        const card = document.createElement("article");
+        card.className = "result-card";
+
+        const header = document.createElement("div");
+        header.className = "result-header";
+
+        const titleWrap = document.createElement("div");
+        titleWrap.className = "result-title";
+        titleWrap.textContent = strategy.name;
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "result-subtitle";
+        subtitle.textContent = `${strategy.hero === "None" ? "No Hero" : strategy.hero} • Modes: ${strategy.missionTags.join(", ")}`;
+
+        header.appendChild(titleWrap);
+        header.appendChild(subtitle);
+        card.appendChild(header);
+
+        if (strategy.summary) {
+          const p = document.createElement("p");
+          p.className = "small";
+          p.textContent = strategy.summary;
+          card.appendChild(p);
+        }
+
+        const tagsRow = document.createElement("div");
+        tagsRow.className = "tags";
+        if (strategy.recommendedMaps && strategy.recommendedMaps.length) {
+          const rm = document.createElement("span");
+          rm.className = "tag";
+          rm.textContent = "Maps: " + strategy.recommendedMaps.slice(0, 3).join(", ") +
+            (strategy.recommendedMaps.length > 3 ? "…" : "");
+          tagsRow.appendChild(rm);
+        }
+        if (strategy.waterPreferred === "needs_water") {
+          const w = document.createElement("span");
+          w.className = "tag";
+          w.textContent = "Water-dependent";
+          tagsRow.appendChild(w);
+        }
+        if (strategy.microHeavy) {
+          const mh = document.createElement("span");
+          mh.className = "tag badge-danger";
+          mh.textContent = "High-micro";
+          tagsRow.appendChild(mh);
+        }
+        card.appendChild(tagsRow);
+
+        container.appendChild(card);
+      });
+    }
+  }
+
+  /*****************
+   * INIT          *
+   *****************/
+
+  initMaps();
+  renderHeroChips();
+  renderBrowse();
+  runFilter();
+</script>
+</body>
+</html>
