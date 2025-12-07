@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1020">
   <meta charset="UTF-8" />
   <title>BTD6 Strategy Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- PWA-ish bits -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1020">
   <style>
     :root {
       --bg: #0b1020;
@@ -606,13 +607,6 @@
 
   /**
    * Strategies
-   *  - tier: "S" | "A" | "B"
-   *  - hero: hero name or "None"
-   *  - microHeavy: true if Corvus/Geraldo/temple stuff / tight micro
-   *  - missionTags: ["chimps","impoppable","hard","boss"]
-   *  - mapTags: rough descriptors for scoring
-   *  - waterPreferred: "any" | "needs_water" | "land_only"
-   *  - recommendedMaps: list of map names
    */
   const STRATEGIES = [
     /* ========= S-Tier anchors ========= */
@@ -1102,6 +1096,60 @@
 
   let selectedHeroes = [];
 
+  // ---- localStorage state ----
+  const STORAGE_KEY = "btd6PlannerStateV1";
+
+  function saveState() {
+    try {
+      const state = {
+        heroes: selectedHeroes,
+        map: mapSelect.value || "",
+        mission: missionSelect.value || "",
+        water: !!waterToggle.checked,
+        micro: !!microToggle.checked
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {
+      // fail silently; not critical
+    }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      if (!state || typeof state !== "object") return;
+
+      // heroes
+      if (Array.isArray(state.heroes)) {
+        selectedHeroes = state.heroes.filter(h =>
+          HEROES.some(H => H.toLowerCase() === h.toLowerCase())
+        );
+      }
+
+      // map
+      if (state.map && MAPS.some(m => m.name === state.map)) {
+        mapSelect.value = state.map;
+      }
+
+      // mission
+      if (state.mission && ["chimps","impoppable","hard","boss"].includes(state.mission)) {
+        missionSelect.value = state.mission;
+      }
+
+      // toggles
+      if (typeof state.water === "boolean") {
+        waterToggle.checked = state.water;
+      }
+      if (typeof state.micro === "boolean") {
+        microToggle.checked = state.micro;
+      }
+    } catch (_) {
+      // ignore parse errors
+    }
+  }
+
   // Populate map dropdown
   function initMaps() {
     const byDiff = { Beginner: [], Intermediate: [], Advanced: [], Expert: [], Other: [] };
@@ -1298,6 +1346,7 @@
     const top = withScore.slice(0, 5).map(x => x.s);
 
     renderResults(top, filtered.length);
+    saveState();  // persist current state whenever filters evaluated
   }
 
   function renderResults(strategies, totalMatches) {
@@ -1475,10 +1524,10 @@
    *****************/
 
   initMaps();
+  loadState();       // restore hero/map/mode/toggle state
   renderHeroChips();
   renderBrowse();
   runFilter();
 </script>
 </body>
-
 </html>
