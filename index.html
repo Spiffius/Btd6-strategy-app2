@@ -2,25 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>BTD6 Strategy Planner</title>
+  <title>BTD6 Hard Mode Strategy Picker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- PWA-ish bits -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b1020">
   <style>
     :root {
-      --bg: #0b1020;
-      --bg-elevated: #141a33;
-      --accent: #ffcc33;
-      --accent-soft: rgba(255, 204, 51, 0.15);
-      --accent-strong: #ffdb4d;
-      --text: #f5f7ff;
-      --text-muted: #a5afd3;
-      --danger: #ff6b6b;
-      --chip-bg: rgba(255, 255, 255, 0.06);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --radius-lg: 18px;
-      --radius-pill: 999px;
+      --bg: #050816;
+      --bg-elevated: #0f172a;
+      --accent: #22c55e;
+      --accent-soft: #15803d;
+      --accent-muted: #4ade80;
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --chip-bg: #111827;
     }
 
     * {
@@ -29,1505 +23,1244 @@
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1c264d 0, #050814 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
       color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
     }
 
     .app-shell {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px 10px 36px;
+      width: 100%;
+      max-width: 1200px;
+      padding: 1rem;
     }
 
-    header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
+    .card {
+      background: linear-gradient(145deg, #020617 0, #020617 40%, #020617 100%);
+      border-radius: 1rem;
+      border: 1px solid var(--border-subtle);
+      padding: 1rem 1.25rem 1.25rem;
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(14px);
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      margin: 0;
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 0.25rem;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.5rem;
     }
 
-    header h1 span.logo-dot {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff 0, #ffe27a 30%, #ff9a3c 65%, #ff3c3c 100%);
-      box-shadow: 0 0 18px rgba(255, 204, 51, 0.9);
+    h1 span.logo-dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 160deg,
+        #22c55e,
+        #0ea5e9,
+        #a855f7,
+        #22c55e
+      );
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
     }
 
-    header p {
-      margin: 0;
+    .subtitle {
       color: var(--text-muted);
       font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 0.8rem 0 0.4rem;
+    }
+
+    label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    select,
+    input[type="text"] {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-subtle);
+      background: #020617;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    select[multiple] {
+      min-height: 150px;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--accent-muted);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
 
     .pill-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 0.4rem;
     }
 
     .pill {
-      padding: 3px 10px;
-      border-radius: var(--radius-pill);
-      font-size: 0.8rem;
-      border: 1px solid var(--border-subtle);
-      background: rgba(10, 16, 34, 0.9);
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .pill strong {
-      color: var(--accent-strong);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 6px;
-      margin: 16px 0 10px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 8px 10px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border-subtle);
-      background: rgba(8, 10, 24, 0.9);
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.07s;
-    }
-
-    .tab-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, #ffcc33, #ff9a3c);
-      border-color: transparent;
-      color: #1b1300;
-      font-weight: 600;
-    }
-
-    .tab-btn span.emoji {
-      font-size: 1.1rem;
-    }
-
-    .panel {
-      display: none;
-      background: rgba(8, 12, 30, 0.94);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-subtle);
-      padding: 14px 14px 16px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .field label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-    }
-
-    select, .fake-multiselect {
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      background: rgba(5, 8, 23, 0.9);
-      color: var(--text);
-      padding: 7px 9px;
-      font-size: 0.9rem;
-      outline: none;
-      width: 100%;
-    }
-
-    select:focus, .fake-multiselect:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(255, 204, 51, 0.6);
-    }
-
-    .fake-multiselect {
-      min-height: 38px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      align-items: center;
-      cursor: text;
-    }
-
-    .fake-multiselect input {
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--text);
-      font-size: 0.88rem;
-      min-width: 60px;
-      flex: 1;
-    }
-
-    .chip {
-      border-radius: var(--radius-pill);
-      background: var(--chip-bg);
-      padding: 3px 8px;
       font-size: 0.78rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .chip button {
-      border: none;
-      background: none;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--chip-bg);
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 0.8rem;
-      padding: 0;
+      user-select: none;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .pill.active {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--accent);
+      color: var(--accent-muted);
     }
 
     .toggle-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
+      gap: 0.75rem;
+      margin-top: 0.6rem;
     }
 
     .toggle {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      padding: 4px 8px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border-subtle);
-      background: rgba(5, 8, 23, 0.9);
+      gap: 0.35rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
       cursor: pointer;
+      user-select: none;
     }
 
     .toggle input {
       accent-color: var(--accent);
     }
 
-    .meta-row {
+    .actions {
+      margin-top: 0.8rem;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      gap: 0.5rem;
       align-items: center;
-      gap: 8px;
-      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    button.primary {
+      border: none;
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent) 0, var(--accent-soft) 100%);
+      color: #022c22;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.4);
+    }
+
+    button.primary:hover {
+      filter: brightness(1.05);
+    }
+
+    button.secondary {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-muted);
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .tab-row {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 0.1rem;
+      background: #020617;
+      border: 1px solid var(--border-subtle);
+      margin-left: auto;
+    }
+
+    .tab-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 0.3rem 0.8rem;
       font-size: 0.8rem;
+      cursor: pointer;
+      background: transparent;
       color: var(--text-muted);
     }
 
-    .meta-row span.badge {
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-      background: var(--accent-soft);
-      color: var(--accent-strong);
-      font-size: 0.78rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    .tab-btn.active {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent-muted);
     }
 
-    .results {
-      margin-top: 10px;
+    .badges-row {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.15rem;
     }
 
-    .result-card {
-      border-radius: var(--radius-lg);
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
       border: 1px solid var(--border-subtle);
-      padding: 10px 11px;
-      background: radial-gradient(circle at top left, rgba(255, 204, 51, 0.09), rgba(5, 8, 18, 0.96));
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
     }
 
-    .result-header {
+    .badge.tier-S {
+      border-color: #f97316;
+      color: #fed7aa;
+    }
+
+    .badge.tier-A {
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+
+    .badge.tier-B {
+      border-color: #38bdf8;
+      color: #bae6fd;
+    }
+
+    .strategies-list {
+      margin-top: 0.75rem;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .strategy-card {
+      border-radius: 0.9rem;
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, #020617 0, #020617 30%, #020617 100%);
+      padding: 0.7rem 0.75rem 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .strategy-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
-    .result-title {
-      font-size: 0.98rem;
+    .strategy-name {
+      font-size: 0.95rem;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
-    .result-subtitle {
-      font-size: 0.78rem;
+    .strategy-heroes {
+      font-size: 0.8rem;
       color: var(--text-muted);
+      margin-top: 0.15rem;
     }
 
-    .tier-pill {
-      border-radius: var(--radius-pill);
-      padding: 2px 7px;
-      font-size: 0.78rem;
-      border: 1px solid var(--accent);
-      color: var(--accent-strong);
-      background: rgba(255, 204, 51, 0.08);
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      font-size: 0.78rem;
-    }
-
-    .tags .tag {
-      border-radius: var(--radius-pill);
-      padding: 2px 6px;
-      background: var(--chip-bg);
+    .strategy-notes {
+      font-size: 0.8rem;
       color: var(--text-muted);
+      margin-top: 0.35rem;
     }
 
-    .tower-list {
-      margin: 0;
-      padding-left: 16px;
-      font-size: 0.82rem;
-    }
-
-    .tower-list li {
-      margin: 1px 0;
-    }
-
-    .phase-label {
+    .phase-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+      margin-top: 0.5rem;
       font-size: 0.78rem;
-      color: var(--accent-strong);
+    }
+
+    .phase {
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 0.6rem;
+      padding: 0.35rem 0.4rem;
+      border: 1px dashed var(--border-subtle);
+    }
+
+    .phase-title {
+      font-weight: 600;
+      font-size: 0.74rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.18rem;
+    }
+
+    ul.compact {
+      margin: 0;
+      padding-left: 1rem;
+      list-style-type: disc;
+    }
+
+    ul.compact li {
+      margin: 0.04rem 0;
     }
 
     .empty-state {
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(5, 9, 20, 0.9);
-      border: 1px dashed var(--border-subtle);
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
+      margin-top: 0.75rem;
     }
 
-    .badge-danger {
-      color: var(--danger);
-    }
-
-    .browse-group {
-      margin-bottom: 16px;
-    }
-
-    .browse-group h3 {
-      font-size: 1rem;
-      margin: 0 0 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .browse-group h3 span {
-      font-size: 0.8rem;
+    .hint {
+      font-size: 0.75rem;
       color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .browse-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 10px;
-    }
-
-    .small {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 1.4rem;
-      }
-      .panel {
-        padding: 12px;
-      }
-      .result-card {
-        padding: 9px;
-      }
+      margin-top: 0.35rem;
     }
   </style>
 </head>
 <body>
-<div class="app-shell">
-  <header>
-    <h1>
-      <span class="logo-dot"></span>
-      BTD6 Strategy Planner
-    </h1>
-    <p>
-      Pick your hero, map, and mode to get a short list of solid, low-micro strategies. 
-      You can optionally include spicy micro stuff (Corvus, Geraldo, temple sacs) with a toggle.
-    </p>
-    <div class="pill-row">
-      <div class="pill"><strong>Meta scope:</strong> v50–52 community consensus (Reddit, Discord, YouTube, wiki)</div>
-      <div class="pill">Bias toward <strong>no-ability / low-micro</strong> CHIMPS &amp; Impoppable strats</div>
-    </div>
-  </header>
+  <div class="app-shell">
+    <div class="card">
+      <header>
+        <h1>
+          <span class="logo-dot"></span>
+          BTD6 Hard Mode Strategy Picker
+        </h1>
+        <div class="subtitle">
+          Filter B–S tier, low-micro strats by hero, map traits, and Hard/Netflix mode.
+        </div>
+      </header>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="finder">
-      <span class="emoji">🎯</span> Strategy Finder
-    </button>
-    <button class="tab-btn" data-tab="browse">
-      <span class="emoji">📚</span> Browse All Strats
-    </button>
+      <div class="layout">
+        <!-- LEFT: CONTROLS -->
+        <div>
+          <div class="section-title">Heroes (multi-select)</div>
+          <label for="heroSelect">
+            Pick one or more heroes you’re open to using. Leave empty for “any”.
+          </label>
+          <select id="heroSelect" multiple>
+            <!-- populated by JS -->
+          </select>
+          <div class="hint">
+            Tip: hero-less strats (e.g. generic Perma Spike) still appear even if you pick specific heroes.
+          </div>
+
+          <div class="section-title">Map & Traits</div>
+          <label for="mapName">Map name (optional, free text)</label>
+          <input id="mapName" type="text" placeholder="e.g. Dark Castle, Logs, Ravine, Tricky Tracks…" />
+
+          <label style="margin-top:0.5rem;">Map traits (optional)</label>
+          <div id="mapTraitsRow" class="pill-row">
+            <!-- pills via JS -->
+          </div>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input id="waterToggle" type="checkbox" />
+              Water-heavy map (enables Pirate Lord / Carrier Flagship / water strats)
+            </label>
+          </div>
+
+          <div class="section-title">Hard / Netflix Mode</div>
+          <label for="modeSelect">
+            Choose a Hard-tab mode (matches Netflix BTD6; CHIMPS/Impoppable included).
+          </label>
+          <select id="modeSelect">
+            <!-- populated by JS -->
+          </select>
+
+          <div class="section-title">Advanced Filters</div>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input id="microToggle" type="checkbox" />
+              Include micro-heavy strats (Corvus, Geraldo shop spam, mine stacking, temple sacs…)
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="filterBtn">Suggest strategies</button>
+            <button class="secondary" id="resetBtn">Reset filters</button>
+
+            <div class="tab-row">
+              <button class="tab-btn active" data-tab="suggested">Top 5 Suggestions</button>
+              <button class="tab-btn" data-tab="all">Full Library</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: RESULTS -->
+        <div>
+          <div class="section-title">
+            Strategies
+          </div>
+          <div id="strategiesList" class="strategies-list"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Strategy Finder Panel -->
-  <section class="panel active" id="panel-finder">
-    <div class="filter-grid">
-      <div class="field">
-        <label for="hero-input">Hero (multi-select)</label>
-        <div class="fake-multiselect" id="hero-multi">
-          <!-- chips injected here -->
-          <input id="hero-input" type="text" placeholder="Type hero name…" autocomplete="off" />
+  <script>
+    // --- DATA -----------------------------------------------------------------
+
+    const HEROES = [
+      { id: "none", name: "No specific hero" },
+      { id: "quincy", name: "Quincy" },
+      { id: "gwendolin", name: "Gwendolin" },
+      { id: "striker", name: "Striker Jones" },
+      { id: "obin", name: "Obyn Greenfoot" },
+      { id: "churchill", name: "Captain Churchill" },
+      { id: "benjamin", name: "Benjamin" },
+      { id: "ezili", name: "Ezili" },
+      { id: "pat", name: "Pat Fusty" },
+      { id: "adora", name: "Adora" },
+      { id: "brickell", name: "Admiral Brickell" },
+      { id: "etienne", name: "Etienne" },
+      { id: "sauda", name: "Sauda" },
+      { id: "psi", name: "Psi" },
+      { id: "geraldo", name: "Geraldo" },
+      { id: "jericho", name: "Agent Jericho" },
+      { id: "corvus", name: "Corvus" },
+      { id: "rosalia", name: "Rosalia" },
+      { id: "bonnie", name: "Bonnie" },
+      { id: "amelia", name: "Amelia" },
+      { id: "zeejay", name: "Zee Jay" },
+      { id: "silas", name: "Silas" }
+    ];
+
+    const MODES = [
+      { id: "any", label: "Any Hard/Netflix mode" },
+      { id: "hard-standard", label: "Hard – Standard" },
+      { id: "abr", label: "Hard – Alternate Bloons Rounds" },
+      { id: "magic-only", label: "Hard – Magic Only" },
+      { id: "double-hp-moabs", label: "Hard – Double HP MOABs" },
+      { id: "half-cash", label: "Hard – Half Cash" },
+      { id: "impoppable", label: "Impoppable" },
+      { id: "chimps", label: "CHIMPS" }
+    ];
+
+    const MAP_TRAITS = [
+      { id: "beginner", label: "Beginner" },
+      { id: "intermediate", label: "Intermediate" },
+      { id: "advanced", label: "Advanced" },
+      { id: "expert", label: "Expert" },
+      { id: "short_path", label: "Short / tight path" },
+      { id: "long_path", label: "Long looping path" },
+      { id: "multi_path", label: "Multiple paths" },
+      { id: "los_blocked", label: "Lots of LOS blockers" },
+      { id: "limited_placements", label: "Limited placements" },
+      { id: "water_heavy", label: "Lots of water" },
+      { id: "no_water", label: "No water" }
+    ];
+
+    // Tier weight for sorting suggestions
+    const TIER_WEIGHT = { S: 3, A: 2, B: 1 };
+
+    // micro: "low" | "medium" | "high"
+    // mapTraits: matches MAP_TRAITS ids + "generalist"
+    // modes: subset of MODES ids (use "any" for general)
+    // needsWater: true => hide if waterToggle is off
+    // heroes: list of hero ids that particularly suit the strat (can be empty)
+
+    const STRATEGIES = [
+      {
+        id: "silas_super_brittle_smfc",
+        name: "Silas Super Brittle + Super Monkey Fan Club",
+        tier: "S",
+        heroes: ["silas"],
+        micro: "medium", // timing SMFC but not insane
+        needsWater: false,
+        mapTraits: ["advanced", "expert", "multi_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "S-tier late-game combo built around Silas buffing Ice Monkeys and a wall of Super Monkey Fan Club darts. Cheap for its power and very flexible.",
+        build: {
+          early: [
+            "Open with cheap early game: 0-0-2 Dart + 0-2-0 Ninja + basic 2-0-0 farm (in non-CHIMPS).",
+            "Place Silas early to start leveling and to get ice buffs rolling.",
+            "Add 0-2-3 Ice(s) for slow + shard value where path is dense."
+          ],
+          mid: [
+            "Rush 0-2-5 Super Brittle on a key choke; place it where all main MOAB traffic passes.",
+            "Add 0-2-4 Super Monkey (Super Monkey Fan Club) & village 2-3-0 (jungle drums + camo).",
+            "Fill in with more 0-2-4/0-2-5 SMFC darts as needed, plus 4-0-2 Alchemist on main group."
+          ],
+          late: [
+            "Add second Super Brittle if map is long or multi-path.",
+            "Stack more SMFC darts and consider 2-5-0 Ice (Absolute Zero) for extra control.",
+            "On CHIMPS/Impoppable, lean on Silas abilities to freeze dense rounds (95–100)."
+          }
+        }
+      },
+      {
+        id: "striker_bomb_blitz",
+        name: "Striker Jones + Bomb Blitz Core",
+        tier: "S",
+        heroes: ["striker"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "expert", "short_path", "multi_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "Post-buff Bomb Blitz is effectively a cheaper, spammable mini-Sar Bomba; with Striker level 20 resetting the ability it becomes a very safe, consistent black-border strat on anything that isn’t the absolute hardest map.",
+        build: {
+          early: [
+            "Place Striker early so his bomb buffs come online sooner.",
+            "Use 0-2-3 Bomb Shooters on key bends for cheap, reliable early damage.",
+            "Add 2-0-0 Village for attack speed and lead/black handling coverage."
+          ],
+          mid: [
+            "Rush first 2-0-5 Bomb Blitz on your best central choke point.",
+            "Layer extra 0-3-0 and 2-3-0 Bombs around it for stuns and cleanup.",
+            "Add 3-0-2 Village (primary mentoring) if running many Bombs."
+          ],
+          late: [
+            "Pick up Striker level 20 before the scariest rounds (98, 99, 100).",
+            "Add second Bomb Blitz if map is long or has multiple paths.",
+            "On CHIMPS, lean on Bomb Blitz + Stun overlap to trivialize 95–99."
+          }
+        }
+      },
+      {
+        id: "brickell_pirate_lord",
+        name: "Admiral Brickell + Pirate Lord Cleanup",
+        tier: "S",
+        heroes: ["brickell"],
+        micro: "medium",
+        needsWater: true,
+        mapTraits: ["water_heavy", "advanced", "expert"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "On maps with good water lines, Brickell + Pirate Lord (often with Energizer) becomes an absurdly strong MOAB/DT cleanup and boss-killer. Hard-carries many expert water maps when you have solid early/midgame.",
+        build: {
+          early: [
+            "Place Brickell in water or near water early so her leveling and mines start contributing.",
+            "Use cheap early game (Dart + Sub 0-0-2 into 0-2-3) or a basic Wizard/Ninja core.",
+            "Add 0-2-4 Buccaneer(s) as midgame MOAB control + income (in non-CHIMPS)."
+          ],
+          mid: [
+            "Rush 0-4-2 Pirate Lord on central water where both hooks see MOAB traffic.",
+            "Add 0-5-2 Carrier Flagship or 0-4-2 Destroyers if map length allows.",
+            "Energizer (2-5-0 Sub) behind Pirate Lord greatly increases Brickell uptime and hook spam."
+          ],
+          late: [
+            "Layer more Destroyers/Carriers as needed; Pirate Lord handles BAD support and DDTs.",
+            "Brickell level 20 + naval buffs let you delete multi-MOAB waves almost on cooldown.",
+            "On CHIMPS, backline with 0-2-5 Icicle Impale or 0-2-5 Super Brittle if map supports it."
+          }
+        }
+      },
+      {
+        id: "perma_spike_cleanup",
+        name: "Perma Spike + Stall Cleanup",
+        tier: "S",
+        heroes: [], // hero-flexible
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "expert", "long_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Despite a history of nerfs, Perma Spike remains one of the safest and most consistent black-border cleanups: it both backstops leaks and chunks round 100 on its own when properly stalled. :contentReference[oaicite:7]{index=7}",
+        build: {
+          early: [
+            "Standard low-micro start: Dart/Ninja into 0-0-2 Wizard and a 2-0-0 Village.",
+            "If allowed, build a 2-0-0 Farm or two to afford Perma Spike more comfortably.",
+            "Add a 0-2-3 Spike Factory near the exit to start building a spike pile."
+          ],
+          mid: [
+            "Upgrade to 0-2-5 Perma Spike at the very end of the track where Bloons exit.",
+            "Add stall: 4-0-2 Main MOAB on ‘Last’ or 0-3-2 MOAB Press spam near mid-track.",
+            "Consider 3-0-2 Village over the stall group for pierce/speed."
+          ],
+          late: [
+            "On very hard maps, add a second Spike Factory as 2-0-4 middle path for extra blob.",
+            "Layer extra stall (0-2-5 Super Brittle or 0-2-5 Icicle Impale) to feed the pile.",
+            "For Impoppable, plan the economy so Perma Spike is online by ~80–85."
+          }
+        }
+      },
+      {
+        id: "archmage_solver",
+        name: "Archmage + Bloon Solver (First Strike Flex)",
+        tier: "A",
+        heroes: ["obin", "ezili", "rosalia"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["advanced", "expert", "long_path", "multi_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "A ‘pop 3 black border’ workhorse strat: Archmage handles mixed waves, Bloon Solver deals with ceramics, and a First Strike or two patches their round 100 weakness. :contentReference[oaicite:8]{index=8}",
+        build: {
+          early: [
+            "Hero early: Obyn/Ezili/Rosalia depending on preference and map.",
+            "Start with 0-0-2 Wizard + 0-2-0 Ninja or 2-0-0 Druid core for early rounds.",
+            "Add a Village 0-2-0 covering your main cluster if LOS permits."
+          ],
+          mid: [
+            "Rush 0-0-5 Archmage at a central high-traffic point.",
+            "Add 0-4-2 Bloon Solver positioned where ceramics clump hardest.",
+            "Support with 2-3-0 Village (jungle drums + camo) and 4-0-2 Alchemist on the main DPS."
+          ],
+          late: [
+            "Add 2-0-5 Sub(s) (First Strike) on water maps for round 100 and high HP MOABs.",
+            "Consider 0-2-5 Icicle Impale or 0-2-5 Super Brittle depending on hero synergy.",
+            "Fill leftover cash with 0-2-4 Ninjas or 2-0-4 Snipers on strong."
+          }
+        }
+      },
+      {
+        id: "glaive_lord_core",
+        name: "Glaive Lord Anchor + Support",
+        tier: "A",
+        heroes: ["quincy", "sauda", "psi"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["beginner", "intermediate", "advanced", "short_path", "multi_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "Extremely reliable lane anchor; Glaive Lord’s orbitals and main attack handle one lane while stray bloons and second lanes get sniped by orbitals. Great generalist strat for a huge number of maps. :contentReference[oaicite:9]{index=9}",
+        build: {
+          early: [
+            "Open with hero + 0-2-3 Boomerang on main bend (favours Sauda/Psi starts).",
+            "Add a 2-0-0 Village for camo if your hero can’t cover it early.",
+            "Pick up 3-0-2 Boomerang as soon as feasible."
+          ],
+          mid: [
+            "Upgrade to 2-0-5 Glaive Lord on the best central intersection / bend.",
+            "Add 0-2-4 Ninja and 0-2-3 Wizard for extra midgame support and camo.",
+            "Consider 3-0-2 or 0-3-2 Alchemist buff on the Glaive Lord."
+          ],
+          late: [
+            "Add 0-2-5 Icicle Impale or 0-2-5 Super Brittle for high-round MOAB/ceramic control.",
+            "On multi-path maps, add a second DPS like 0-2-5 Sky Shredder or 2-0-5 Dartling at the other lane.",
+            "In CHIMPS, lean on cheap support (0-3-0 Village, 0-2-2 Alch) rather than farms."
+          }
+        }
+      },
+      {
+        id: "sky_shredder_core",
+        name: "Sky Shredder Core (with Support)",
+        tier: "B",
+        heroes: ["benjamin", "churchill", "etienne"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "long_path", "multi_path", "los_blocked"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Sky Shredder is expensive but strong, especially once its buffs and support towers are in place. Solid B-tier all-rounder with good cross-map coverage. :contentReference[oaicite:10]{index=10}",
+        build: {
+          early: [
+            "Open with Benjamin (for eco) or Etienne (for early camo) if map allows.",
+            "Use 0-2-0 Ninjas and 0-0-2 Wizards to reach midgame safely.",
+            "Place a 0-0-3 Ace on a big loop once you can keep it supplied."
+          ],
+          mid: [
+            "Upgrade the Ace into 0-2-5 Sky Shredder over the highest coverage loop.",
+            "Add 2-3-0 Village (jungle drums + camo) and 4-0-2 Alchemist to buff it.",
+            "Include 0-2-5 Icicle Impale or 0-3-0 Bombs to help with fortified MOABs."
+          ],
+          late: [
+            "On multi-path maps, consider a second Ace as 2-0-4 for additional coverage.",
+            "Add 0-2-4 Sub(s) on water maps for First Strike safety vs round 100.",
+            "Fill gaps with 0-2-4 Ninjas or 2-0-4 Snipers as cheap supplemental DPS."
+          }
+        }
+      },
+      {
+        id: "sentry_champion_core",
+        name: "Sentry Champion Control",
+        tier: "B",
+        heroes: ["etienne", "psi", "rosalia"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "los_blocked", "limited_placements"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Sentry Champion is a flexible map control tower that handles weird pathing and LOS issues well; very solid when backed by village + alch and a strong hero.",
+        build: {
+          early: [
+            "Hero + 0-2-0 Engineer near the start for early pin/foam support.",
+            "Add 0-2-0 Ninja for reliable popping and lead coverage via hero or 0-0-3 Bomb.",
+            "Place Village 0-2-0 to set up future buffs."
+          ],
+          mid: [
+            "Upgrade Engineer to 2-0-5 Sentry Champion in a central, high-LOS area.",
+            "Add 4-0-2 Alchemist buff on the Engineer and key support towers.",
+            "Use 0-2-3 Glue or 0-3-0 Bombs to help clump bloons into sentry fire."
+          ],
+          late: [
+            "Add 0-2-5 Icicle Impale or 0-0-5 Glue for MOAB/ceramic control.",
+            "Pick up 2-3-0 Village for extra range and attack speed.",
+            "Supplement with 2-0-4 Snipers or 0-2-4 Ninjas on strong targeting."
+          }
+        }
+      },
+      {
+        id: "biggest_one_moab_elim",
+        name: "Striker + Biggest One & MOAB Eliminator",
+        tier: "B",
+        heroes: ["striker"],
+        micro: "medium",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "los_blocked", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "Classic Striker mortar/bomb combo; general play B-tier with A-tier peak when you lean into micro and ideal map layouts (Moon Landing, etc.). :contentReference[oaicite:11]{index=11}",
+        build: {
+          early: [
+            "Place Striker early on, then 0-2-3 Bombs for reliable early damage.",
+            "Add a basic 0-0-2 Wizard or 0-2-0 Ninja for cleanup and camo.",
+            "Place 0-0-3 Mortar aiming at a major cluster to get used to targeting."
+          ],
+          mid: [
+            "Upgrade Mortar to 0-2-5 ‘The Biggest One’ (520 path for faster stuns).",
+            "Add 0-5-0 MOAB Eliminator near the front on strong targeting.",
+            "Use 2-3-0 Village for buffing and to help with camo and attack speed."
+          ],
+          late: [
+            "Micro Biggest One between lanes/chokes if feasible; its radius is forgiving.",
+            "Add extra 0-3-0 Bombs or 0-3-2 Glue to keep MOABs stunned in the blast zone.",
+            "On CHIMPS, carefully time Striker’s abilities into dense MOAB waves."
+          }
+        }
+      },
+      {
+        id: "sub_commander_armada",
+        name: "Sub Commander Armada",
+        tier: "B",
+        heroes: ["brickell", "etienne", "benjamin"],
+        micro: "low",
+        needsWater: true,
+        mapTraits: ["water_heavy", "intermediate", "advanced"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Sub Commander plus a fleet of support subs is a strong, map-dependent B-tier strat with good coverage on water-heavy tracks. :contentReference[oaicite:12]{index=12}",
+        build: {
+          early: [
+            "Open with 0-0-2 Sub in good water and a cheap hero (Ben/Etienne/Brickell).",
+            "Add 0-2-3 Sub(s) for airburst popping and early defense.",
+            "Place Village 0-2-0 if land coverage allows for camo/attack speed."
+          ],
+          mid: [
+            "Upgrade primary Sub to 0-2-5 Sub Commander.",
+            "Add 0-2-4 and 2-0-4 Subs around it for stacked DPS and cleanup.",
+            "On some maps, include Brickell for naval buffs and mine support."
+          ],
+          late: [
+            "Add 2-0-5 Bloontonium Reactor for camo + support if water path allows.",
+            "Include 2-0-5 Sub(s) (First Strike) for round 100.",
+            "Supplement with 0-2-5 Ice or 0-2-5 Super Brittle if map has tight chokes."
+          }
+        }
+      },
+      {
+        id: "etienne_moab_domination",
+        name: "Etienne + MOAB Domination",
+        tier: "B",
+        heroes: ["etienne", "obin", "silas"],
+        micro: "medium",
+        needsWater: false,
+        mapTraits: ["advanced", "expert", "short_path", "multi_path"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Overclocked MOAB Domination on maps with ≤3 lanes is brutally strong; the main weakness is the tricky save-up and falloff on very complex tracks. :contentReference[oaicite:13]{index=13}",
+        build: {
+          early: [
+            "Hero early (Etienne or Obyn) to support the save-up and provide camo.",
+            "Use 0-2-0 Ninjas and 0-0-2 Wizards to reach midgame safely.",
+            "Add 2-0-0 Village for discounts and camo coverage."
+          ],
+          mid: [
+            "Get an Engineer and rush 0-2-5 Overclock.",
+            "Save for 2-0-5 MOAB Domination on a main lane; rely on early core to bridge.",
+            "Once online, keep MOAB Domination constantly attacking the most critical lane."
+          ],
+          late: [
+            "On multi-path maps, add a second strong MOAB DPS (Glaive Lord / Sky Shredder) for off-lanes.",
+            "Keep Overclock on MOAB Dom as much as possible during 90+.",
+            "Add 0-2-5 Super Brittle or 0-2-5 Icicle Impale to amplify pierce and control."
+          }
+        }
+      },
+      {
+        id: "rosalia_apache_prime",
+        name: "Rosalia + Apache Prime",
+        tier: "B",
+        heroes: ["rosalia"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["beginner", "intermediate", "long_path", "generalist"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Rosalia’s discounts make Apache Prime far easier to afford for black borders; peak is lower than other S/A strats but very comfy on many single-lane maps. :contentReference[oaicite:14]{index=14}",
+        build: {
+          early: [
+            "Place Rosalia early so her discounts kick in sooner.",
+            "Use Dart + Heli 0-0-2 or Ninja/Wizard core for early defense.",
+            "Switch Heli to lock-in targeting on a good long path segment."
+          ],
+          mid: [
+            "Rush 2-0-5 Apache Prime using Rosalia’s tier discounts.",
+            "Add 2-3-0 Village and 4-0-2 Alchemist for buffs.",
+            "Keep Apache on ‘Follow Mouse’ or a good locked line depending on map."
+          ],
+          late: [
+            "Add 0-2-5 Icicle Impale or 0-0-5 Glue for MOAB/ceramic control.",
+            "For ABR, supplement with 0-2-4 Ninjas or 2-0-4 Snipers for DDT security.",
+            "Use leftover cash on more support (Spike Factory or extra Helis)."
+          }
+        }
+      },
+      {
+        id: "pod_apache_prime",
+        name: "Prince of Darkness + Apache Prime ‘No-Skill’",
+        tier: "B",
+        heroes: ["obin", "ezili"],
+        micro: "medium",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "long_path"],
+        modes: ["hard-standard", "abr", "impoppable"],
+        notes:
+          "POd + Apache Prime is described as a very easy, low-skill B-tier strat that just works if placed correctly, especially on moderate maps. :contentReference[oaicite:15]{index=15}",
+        build: {
+          early: [
+            "Hero early (Obyn/Ezili), then standard Wizard 0-0-2 start.",
+            "Head into 0-2-0 Ninja and 2-0-0 Wizard to keep things stable.",
+            "Lock the early Heli on a long line if you’re planning ahead."
+          ],
+          mid: [
+            "Rush 0-0-5 Prince of Darkness near the track start so graveyard fills well.",
+            "Then rush 2-0-5 Apache Prime on a long mid-section.",
+            "Ensure POd always has bloons entering in its graveyard radius."
+          ],
+          late: [
+            "If POd graveyard is underused, micromanage Apache Prime off-screen slightly.",
+            "Add 0-2-5 Icicle Impale or 0-0-5 Glue for ceramic/fortified control.",
+            "For trickier maps, extra 0-2-4 Ninjas or 2-0-4 Snipers help cover leaks."
+          }
+        }
+      },
+      {
+        id: "spectre_impale",
+        name: "Spectre + Icicle Impale",
+        tier: "B",
+        heroes: ["rosalia", "obin"],
+        micro: "low",
+        needsWater: false,
+        mapTraits: ["intermediate", "advanced", "multi_path", "long_path"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable"],
+        notes:
+          "Pairing Spectre with Icicle Impale smooths out Spectre’s weaknesses and plays similarly to Solver/Impale or Glaive Lord/Impale. Rated low B-tier but fun and consistent on the right maps. :contentReference[oaicite:16]{index=16}",
+        build: {
+          early: [
+            "Hero early (Rosalia/Obyn) and a 0-0-2 Ace for early coverage.",
+            "Use Ninja/Wizard core to carry you to Spectre timing.",
+            "Place Ace on the biggest loop for best coverage."
+          ],
+          mid: [
+            "Upgrade Ace to 0-2-4 Spectre once eco allows.",
+            "Add 0-2-5 Icicle Impale on a strong choke near the back half of the track.",
+            "Support with Village 2-3-0 for buffs and camo."
+          ],
+          late: [
+            "Stack more Aces (0-2-4) or add a secondary DPS like Glaive Lord.",
+            "Use leftover cash on stall (0-3-0 Bombs or 0-3-2 Glue).",
+            "Fine-tune Spectre’s flight path by adjusting placement or track shape."
+          }
+        }
+      },
+      {
+        id: "geraldo_fire_druids",
+        name: "Geraldo + Jerry Fire Druids",
+        tier: "B",
+        heroes: ["geraldo"],
+        micro: "medium",
+        needsWater: false,
+        mapTraits: ["advanced", "expert", "short_path", "multi_path"],
+        modes: ["hard-standard", "abr", "impoppable"],
+        notes:
+          "Druid spam powered up by Geraldo’s Jerry Fire and support like Glue Storm; rated a solid B-tier in the discussion, stronger than the Shinobi setup but more setup-intensive. :contentReference[oaicite:17]{index=17}",
+        build: {
+          early: [
+            "Place Geraldo early to start stocking items and experience.",
+            "Start with 0-1-0 Druids and standard cheap towers (Dart/Ninja).",
+            "Use Geraldo’s early items (blades, jar) to bridge tricky rounds."
+          ],
+          mid: [
+            "Scale into multiple 0-1-5 Poplust Druids with 2-0-0 Village support.",
+            "Use Jerry Fire and Glue Storm to amp Druid damage on key rounds.",
+            "Add 4-0-2 Alchemist to buff the highest-impact Druids."
+          ],
+          late: [
+            "On higher rounds, keep Jerry Fire uptime high on the biggest Druid cluster.",
+            "Add a hard CC/cleanup piece (0-2-5 Icicle Impale, 0-0-5 Glue, or Perma Spike).",
+            "Use Geraldo’s late-game items (genie, paragon totems if applicable) as needed."
+          }
+        }
+      },
+
+      // --- MICRO-HEAVY OPTIONS (behind toggle) -------------------------------
+
+      {
+        id: "corvus_micro_spam",
+        name: "Corvus Spell Cycling + High-DPS Core",
+        tier: "S",
+        heroes: ["corvus"],
+        micro: "high",
+        needsWater: false,
+        mapTraits: ["advanced", "expert", "short_path", "multi_path"],
+        modes: ["hard-standard", "abr", "double-hp-moabs", "impoppable", "chimps"],
+        notes:
+          "Extremely strong but very micro-heavy: relies on precise spell cycling and positioning. Hidden by default unless you enable micro-heavy strats.",
+        build: {
+          early: [
+            "Place Corvus ASAP so spellbook and XP ramp up early.",
+            "Use cheap Dart/Ninja/Wizard core while you learn early spell usage.",
+            "Prioritize eco (farms) where allowed; Corvus loves money."
+          ],
+          mid: [
+            "Stack a strong DPS core (e.g., 0-2-5 Super Brittle + SMFC or Glaive Lord).",
+            "Cycle Corvus spells aggressively into MOAB-heavy rounds.",
+            "Use spellbook to patch weak camo/lead/ceramic niches."
+          ],
+          late: [
+            "Maintain near-constant spell uptime on dense rounds (90+).",
+            "Add heavy stall (Icicle Impale, Glue) to give spells more time to work.",
+            "Use remaining cash to overbuild farms or support towers depending on mode."
+          }
+        }
+      },
+      {
+        id: "geraldo_savatar",
+        name: "Geraldo Paragon / Savatar Sac Strats",
+        tier: "B",
+        heroes: ["geraldo"],
+        micro: "high",
+        needsWater: false,
+        mapTraits: ["advanced", "expert"],
+        modes: ["hard-standard", "impoppable"],
+        notes:
+          "Geraldo paragon/temple sac strats demand high APM and careful planning; powerful but not recommended without deliberate micro. Hidden unless micro toggle is on.",
+        build: {
+          early: [
+            "Geraldo early for shop scaling and totem accumulation.",
+            "Play standard efficient early game (Dart/Ninja/Wiz).",
+            "Start planning temple positions if going for sacrifices."
+          ],
+          mid: [
+            "Collect and place paragon totems in a safe, buffed area.",
+            "Build sacrificial towers in the right value ratios (if going temple).",
+            "Use Geraldo’s items to cover round spikes during setup."
+          ],
+          late: [
+            "Drop Paragons and/or temple upgrades at ideal timings.",
+            "Continue feeding totems where possible for higher degrees.",
+            "Mix in standard high-tier supports (Village, Alch, Ice) to patch gaps."
+          }
+        }
+      }
+    ];
+
+    // --- STATE & HELPERS -----------------------------------------------------
+
+    let activeTab = "suggested";
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function getSelectedHeroes() {
+      const sel = $("heroSelect");
+      return Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== "none");
+    }
+
+    function getSelectedMapTraits() {
+      const active = document.querySelectorAll("#mapTraitsRow .pill.active");
+      return Array.from(active).map(p => p.dataset.id);
+    }
+
+    function getSelectedMode() {
+      return $("modeSelect").value;
+    }
+
+    function tierScore(tier) {
+      return TIER_WEIGHT[tier] || 0;
+    }
+
+    function strategyMatchesFilters(strategy, { heroes, mapTraits, mode, water, includeMicro }) {
+      // micro gate
+      if (!includeMicro && strategy.micro === "high") return false;
+      // water gate
+      if (!water && strategy.needsWater) return false;
+
+      // hero filter: if user selected heroes, we keep
+      //  - hero-less strats always allowed
+      //  - hero-tagged strats only if intersection
+      if (heroes.length > 0 && strategy.heroes.length > 0) {
+        const hasOverlap = strategy.heroes.some(h => heroes.includes(h));
+        if (!hasOverlap) return false;
+      }
+
+      // mode filter
+      if (mode !== "any") {
+        if (!strategy.modes.includes(mode) && !strategy.modes.includes("any")) {
+          return false;
+        }
+      }
+
+      // map trait filter: all selected traits must be compatible
+      if (mapTraits.length > 0) {
+        const tags = strategy.mapTraits || [];
+        const hasGeneralist = tags.includes("generalist");
+        const allMatch = mapTraits.every(t => tags.includes(t) || hasGeneralist);
+        if (!allMatch) return false;
+      }
+
+      return true;
+    }
+
+    function buildStrategyCard(strategy) {
+      const heroNames =
+        strategy.heroes.length === 0
+          ? "Hero-flexible"
+          : strategy.heroes
+              .map(id => HEROES.find(h => h.id === id)?.name || id)
+              .join(", ");
+
+      const tierBadge = `<span class="badge tier-${strategy.tier}">Tier ${strategy.tier}</span>`;
+      const microLabel =
+        strategy.micro === "low"
+          ? "Low micro"
+          : strategy.micro === "medium"
+          ? "Moderate micro"
+          : "High micro";
+
+      const modeLabels = strategy.modes
+        .map(id => MODES.find(m => m.id === id))
+        .filter(Boolean)
+        .map(m => m.label.replace("Hard – ", "").replace("Hard-", "Hard "))
+        .join(" • ");
+
+      const traitLabels = (strategy.mapTraits || [])
+        .filter(t => t !== "generalist")
+        .map(id => MAP_TRAITS.find(mt => mt.id === id))
+        .filter(Boolean)
+        .map(mt => mt.label)
+        .join(" • ");
+
+      const phases = ["early", "mid", "late"];
+
+      return `
+        <div class="strategy-card">
+          <div class="strategy-header">
+            <div>
+              <div class="strategy-name">${strategy.name}</div>
+              <div class="strategy-heroes">Heroes: ${heroNames}</div>
+              <div class="badges-row">
+                ${tierBadge}
+                <span class="badge">${microLabel}</span>
+                ${
+                  strategy.needsWater
+                    ? '<span class="badge">Water-required</span>'
+                    : ""
+                }
+                ${
+                  modeLabels
+                    ? `<span class="badge">${modeLabels}</span>`
+                    : ""
+                }
+                ${
+                  traitLabels
+                    ? `<span class="badge">${traitLabels}</span>`
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+          <div class="strategy-notes">${strategy.notes}</div>
+          <div class="phase-row">
+            ${phases
+              .map(phase => {
+                const items = strategy.build?.[phase] || [];
+                if (!items.length) return "";
+                const title =
+                  phase === "early"
+                    ? "Early"
+                    : phase === "mid"
+                    ? "Mid"
+                    : "Late";
+                const lis = items.map(i => `<li>${i}</li>`).join("");
+                return `
+                  <div class="phase">
+                    <div class="phase-title">${title}</div>
+                    <ul class="compact">${lis}</ul>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
         </div>
-        <div class="small">Leave empty for “any hero”. Type to add (Sauda, Brickell, Obyn, etc.).</div>
-      </div>
-
-      <div class="field">
-        <label for="map-select">Map</label>
-        <select id="map-select">
-          <option value="">Any map</option>
-        </select>
-        <div class="small">Includes all standard BTD6 maps (v48.x list). Secret maps included as “Other”.</div>
-      </div>
-
-      <div class="field">
-        <label for="mission-select">Mode / Mission</label>
-        <select id="mission-select">
-          <option value="">Any hard-ish mode</option>
-          <option value="chimps">C.H.I.M.P.S.</option>
-          <option value="impoppable">Impoppable</option>
-          <option value="hard">Standard Hard / Alt Rounds</option>
-          <option value="boss">Boss / Elite</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="toggle-row">
-      <label class="toggle">
-        <input type="checkbox" id="water-toggle" />
-        <span>🌊 Treat as water-heavy map (enable Brickell / carrier / subs strats)</span>
-      </label>
-      <label class="toggle">
-        <input type="checkbox" id="micro-toggle" />
-        <span>⚙️ Include high-micro setups (Corvus, Geraldo shop, temple sacrifices)</span>
-      </label>
-    </div>
-
-    <div class="meta-row">
-      <span class="badge">Tip: You can filter by hero only, or map only, or both.</span>
-      <span class="small" id="match-count"></span>
-    </div>
-
-    <div class="results" id="results"></div>
-  </section>
-
-  <!-- Browse Panel -->
-  <section class="panel" id="panel-browse">
-    <div class="browse-group">
-      <h3>S-Tier anchors <span>(very reliable even on most advanced / expert maps)</span></h3>
-      <div class="browse-grid" id="browse-s"></div>
-    </div>
-    <div class="browse-group">
-      <h3>A-Tier workhorses <span>(strong but a bit more map / hero dependent)</span></h3>
-      <div class="browse-grid" id="browse-a"></div>
-    </div>
-    <div class="browse-group">
-      <h3>B-Tier situational picks <span>(great on the right map or for variety)</span></h3>
-      <div class="browse-grid" id="browse-b"></div>
-    </div>
-  </section>
-</div>
-
-<script>
-  /********************
-   * DATA DEFINITIONS *
-   ********************/
-
-  const HEROES = [
-    "Sauda",
-    "Obyn",
-    "Admiral Brickell",
-    "Gwendolin",
-    "Geraldo",
-    "Corvus",
-    "Etienne",
-    "Pat Fusty",
-    "Psi",
-    "Adora",
-    "Benjamin",
-    "None"
-  ];
-
-  // BTD6 maps (v48.x list). Difficulty & hasWater approximated for filtering.
-  const MAPS = [
-    // Beginner
-    { name: "Monkey Meadow", difficulty: "Beginner", hasWater: false },
-    { name: "In The Loop", difficulty: "Beginner", hasWater: true },
-    { name: "Middle of the Road", difficulty: "Beginner", hasWater: false },
-    { name: "Tree Stump", difficulty: "Beginner", hasWater: false },
-    { name: "Town Center", difficulty: "Beginner", hasWater: false },
-    { name: "One Two Tree", difficulty: "Beginner", hasWater: false },
-    { name: "Scrapyard", difficulty: "Beginner", hasWater: false },
-    { name: "The Cabin", difficulty: "Beginner", hasWater: false },
-    { name: "Resort", difficulty: "Beginner", hasWater: true },
-    { name: "Tinkerton", difficulty: "Beginner", hasWater: false },
-    { name: "Skates", difficulty: "Beginner", hasWater: true },
-    { name: "Lotus Island", difficulty: "Beginner", hasWater: true },
-    { name: "Candy Falls", difficulty: "Beginner", hasWater: true },
-    { name: "Winter Park", difficulty: "Beginner", hasWater: false },
-    { name: "Carved", difficulty: "Beginner", hasWater: false },
-    { name: "Park Path", difficulty: "Beginner", hasWater: false },
-    { name: "Alpine Run", difficulty: "Beginner", hasWater: false },
-    { name: "Frozen Over", difficulty: "Beginner", hasWater: true },
-    { name: "Cubism", difficulty: "Beginner", hasWater: false },
-    { name: "Four Circles", difficulty: "Beginner", hasWater: false },
-    { name: "Hedge", difficulty: "Beginner", hasWater: false },
-    { name: "End of the Road", difficulty: "Beginner", hasWater: false },
-    { name: "Logs", difficulty: "Beginner", hasWater: false },
-    { name: "Spa Pits", difficulty: "Beginner", hasWater: true },
-    { name: "Three Mines 'Round", difficulty: "Beginner", hasWater: false },
-
-    // Intermediate
-    { name: "Lost Crevasse", difficulty: "Intermediate", hasWater: false },
-    { name: "Sulfur Springs", difficulty: "Intermediate", hasWater: true },
-    { name: "Luminous Cove", difficulty: "Intermediate", hasWater: true },
-    { name: "Water Park", difficulty: "Intermediate", hasWater: true },
-    { name: "Polyphemus", difficulty: "Intermediate", hasWater: true },
-    { name: "Covered Garden", difficulty: "Intermediate", hasWater: false },
-    { name: "Quarry", difficulty: "Intermediate", hasWater: false },
-    { name: "Quiet Street", difficulty: "Intermediate", hasWater: false },
-    { name: "Bloonarius Prime", difficulty: "Intermediate", hasWater: false },
-    { name: "Balance", difficulty: "Intermediate", hasWater: false },
-    { name: "Encrypted", difficulty: "Intermediate", hasWater: false },
-    { name: "Bazaar", difficulty: "Intermediate", hasWater: true },
-    { name: "Adora's Temple", difficulty: "Intermediate", hasWater: false },
-    { name: "Spring Spring", difficulty: "Intermediate", hasWater: false },
-    { name: "KartsNDarts", difficulty: "Intermediate", hasWater: false },
-    { name: "Moon Landing", difficulty: "Intermediate", hasWater: false },
-    { name: "Haunted", difficulty: "Intermediate", hasWater: false },
-    { name: "Downstream", difficulty: "Intermediate", hasWater: true },
-    { name: "Firing Range", difficulty: "Intermediate", hasWater: false },
-    { name: "Cracked", difficulty: "Intermediate", hasWater: false },
-    { name: "Streambed", difficulty: "Intermediate", hasWater: true },
-    { name: "Chutes", difficulty: "Intermediate", hasWater: false },
-    { name: "Rake", difficulty: "Intermediate", hasWater: false },
-    { name: "Spice Islands", difficulty: "Intermediate", hasWater: true },
-
-    // Advanced
-    { name: "Sunset Gulch", difficulty: "Advanced", hasWater: false },
-    { name: "Enchanted Glade", difficulty: "Advanced", hasWater: false },
-    { name: "Last Resort", difficulty: "Advanced", hasWater: true },
-    { name: "Ancient Portal", difficulty: "Advanced", hasWater: false },
-    { name: "Castle Revenge", difficulty: "Advanced", hasWater: false },
-    { name: "Dark Path", difficulty: "Advanced", hasWater: false },
-    { name: "Erosion", difficulty: "Advanced", hasWater: false },
-    { name: "Midnight Mansion", difficulty: "Advanced", hasWater: false },
-    { name: "Sunken Columns", difficulty: "Advanced", hasWater: true },
-    { name: "X Factor", difficulty: "Advanced", hasWater: false },
-    { name: "Mesa", difficulty: "Advanced", hasWater: false },
-    { name: "Geared", difficulty: "Advanced", hasWater: false },
-    { name: "Spillway", difficulty: "Advanced", hasWater: true },
-    { name: "Cargo", difficulty: "Advanced", hasWater: true },
-    { name: "Pat's Pond", difficulty: "Advanced", hasWater: true },
-    { name: "Peninsula", difficulty: "Advanced", hasWater: true },
-    { name: "High Finance", difficulty: "Advanced", hasWater: false },
-    { name: "Another Brick", difficulty: "Advanced", hasWater: false },
-    { name: "Off The Coast", difficulty: "Advanced", hasWater: true },
-    { name: "Cornfield", difficulty: "Advanced", hasWater: false },
-    { name: "Underground", difficulty: "Advanced", hasWater: false },
-
-    // Expert
-    { name: "Glacial Trail", difficulty: "Expert", hasWater: false },
-    { name: "Dark Dungeons", difficulty: "Expert", hasWater: false },
-    { name: "Sanctuary", difficulty: "Expert", hasWater: false },
-    { name: "Ravine", difficulty: "Expert", hasWater: false },
-    { name: "Flooded Valley", difficulty: "Expert", hasWater: true },
-    { name: "Infernal", difficulty: "Expert", hasWater: false },
-    { name: "Bloody Puddles", difficulty: "Expert", hasWater: false },
-    { name: "Workshop", difficulty: "Expert", hasWater: false },
-    { name: "Quad", difficulty: "Expert", hasWater: false },
-    { name: "Dark Castle", difficulty: "Expert", hasWater: false },
-    { name: "Muddy Puddles", difficulty: "Expert", hasWater: false },
-    { name: "#Ouch", difficulty: "Expert", hasWater: false },
-
-    // Challenge-editor specials (treated as Expert-ish)
-    { name: "Blons", difficulty: "Expert", hasWater: false },
-    { name: "Protect The Yacht", difficulty: "Intermediate", hasWater: true }
-  ];
-
-  /**
-   * Strategies
-   */
-  const STRATEGIES = [
-    /* ========= S-Tier anchors ========= */
-
-    {
-      id: "sauda-logs-poplust",
-      name: "Sauda Forest Poplust Core",
-      tier: "S",
-      hero: "Sauda",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable", "hard"],
-      mapTags: ["beginner", "single_path", "curvy"],
-      waterPreferred: "any",
-      recommendedMaps: ["Logs", "Hedge", "Tree Stump", "Monkey Meadow"],
-      summary: "Sauda + Poplust druids with Alch/Village support. Very low micro, great on short curved lanes.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Place Sauda in a high-traffic bend; add 0-0-0 Dart(s) if needed to stabilize."
-        },
-        {
-          phase: "early",
-          desc: "2-0-0 Alchemist near Sauda (then 3-0-1), set to Strong for lead + damage."
-        },
-        {
-          phase: "mid",
-          desc: "Stack 4–6 0-2-4 Druids (Poplust) in a cluster within Obyn/Village radius if used."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-2 Druid of the Jungle for stray leaks and anti-camouflage with support."
-        },
-        {
-          phase: "late",
-          desc: "0-2-5 Ice (Super Brittle) or 2-0-5 Glue (Relentless/ Moab Glue) and 0-2-4 Village (Jungle Drums + Camo)."
-        }
-      ]
-    },
-
-    {
-      id: "obyn-druid-forest",
-      name: "Obyn Poplust Grove",
-      tier: "S",
-      hero: "Obyn",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["beginner", "intermediate", "multi_path"],
-      waterPreferred: "any",
-      recommendedMaps: ["Cubism", "End of the Road", "Spa Pits"],
-      summary: "Classic Obyn + Poplust circle with Super Brittle + Permaspike safety net.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Open with Obyn in a central overlap; add 0-0-0 Dart for help until lvl 3."
-        },
-        {
-          phase: "mid",
-          desc: "5x 0-2-4 Poplust Druids in a clump, all in Obyn's buff radius."
-        },
-        {
-          phase: "mid",
-          desc: "3-0-0 Alch near the Druid ball, then 4-0-1 (Strong target)."
-        },
-        {
-          phase: "late",
-          desc: "0-2-5 Ice on a key bend (Super Brittle) and 0-2-4 Village (Jungle Drums + Camo)."
-        },
-        {
-          phase: "late",
-          desc: "0-2-5 Spike Factory at back (Permaspike) for safety on rounds 95–100."
-        }
-      ]
-    },
-
-    {
-      id: "dark-castle-poplust-permaspike",
-      name: "Obyn Dark Castle Poplust + Permaspike",
-      tier: "S",
-      hero: "Obyn",
-      microHeavy: false,
-      missionTags: ["chimps"],
-      mapTags: ["expert", "long", "multi_path"],
-      waterPreferred: "any",
-      recommendedMaps: ["Dark Castle", "Muddy Puddles"],
-      summary: "Community-favored low-micro Dark Castle CHIMPS: Obyn + 6 Poplust + Permaspike backline.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Obyn on the main intersection. Support with a 0-0-0 Dart and 0-0-0 Ninja if needed."
-        },
-        {
-          phase: "mid",
-          desc: "6x 0-2-4 Poplust Druids in Obyn radius. Add 3-0-0 → 4-0-1 Alch on Strong."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-3 Wizard for decamo and cleanup, upgraded later to 0-2-5 (Prince of Darkness) if desired."
-        },
-        {
-          phase: "late",
-          desc: "0-2-5 Spike Factory at the end of the final lane for r95–100 insurance."
-        },
-        {
-          phase: "late",
-          desc: "0-2-4 Village over core (Jungle Drums + MIB) if bloon types demand it."
-        }
-      ]
-    },
-
-    {
-      id: "brickell-flooded-flagship",
-      name: "Brickell Flooded Valley Flagship Fleet",
-      tier: "S",
-      hero: "Admiral Brickell",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["expert", "water_heavy"],
-      waterPreferred: "needs_water",
-      recommendedMaps: ["Flooded Valley", "Off The Coast", "Spice Islands", "Peninsula"],
-      summary: "Brickell + Carrier Flagship + Sub core, based on recent no-micro Flooded Valley CHIMPS guides (Update 52.1).",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "0-0-0 Sub on a curve (Strong). Add a second 0-0-0 Sub quickly to stabilize."
-        },
-        {
-          phase: "mid",
-          desc: "Place Brickell where mines cover key path entries. Upgrade main Sub toward 2-0-4 then 2-0-5 (Pre-emptive/First Strike depending on comfort)."
-        },
-        {
-          phase: "mid",
-          desc: "Buy 0-0-4 → 2-0-5 Monkey Buccaneer (Carrier Flagship) as main damage carrier."
-        },
-        {
-          phase: "late",
-          desc: "Add 0-2-4 Village over fleet (Jungle + Camo), then 0-3-2 Sub(s) for extra BAD damage."
-        },
-        {
-          phase: "late",
-          desc: "Optionally place 0-2-5 Ice on frozen water edges for extra control if land slots are tight."
-        }
-      ]
-    },
-
-    {
-      id: "ravine-sauda-archmage-brew",
-      name: "Sauda Ravine Archmage + PermaBrew",
-      tier: "S",
-      hero: "Sauda",
-      microHeavy: false,
-      missionTags: ["chimps"],
-      mapTags: ["expert", "tight_vision"],
-      waterPreferred: "any",
-      recommendedMaps: ["Ravine"],
-      summary: "Sauda carries early; Archmage + PermaBrew do heavy lifting as showcased in low-micro Ravine guides.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Place Sauda on the sword-adjacent intersection so she hits both upper and lower passes. Use the Ravine sword tap mechanic on r6–7."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-3 Wizard into 0-2-5 Archmage in a central, multi-pass spot."
-        },
-        {
-          phase: "mid",
-          desc: "3-0-0 Alch → 4-0-1 → 5-0-2 PermaBrew covering Sauda + Archmage."
-        },
-        {
-          phase: "late",
-          desc: "0-2-4 Village (Jungle + Camo) over the main cluster and a 0-2-5 Ice (Super Brittle) on a shared straight line."
-        },
-        {
-          phase: "late",
-          desc: "Add 0-0-5 Spike Factory at the end if you want extra safety on r95–100."
-        }
-      ]
-    },
-
-    {
-      id: "gwen-ouch-low-micro",
-      name: "Gwendolin #Ouch Firestorm",
-      tier: "S",
-      hero: "Gwendolin",
-      microHeavy: false,
-      missionTags: ["chimps"],
-      mapTags: ["expert", "multi_path"],
-      waterPreferred: "any",
-      recommendedMaps: ["#Ouch"],
-      summary: "Inspired by recent “easiest #Ouch CHIMPS, no abilities/micro” runs: layered spike/Alch/bomb with Gwen’s passive burn.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Place Gwen where she can hit all four lanes. Supplement with 0-0-0 Darts to handle split openings."
-        },
-        {
-          phase: "mid",
-          desc: "Build 2-0-3 Bomb Shooters on key corners for MOAB shred, supported by 3-0-0 → 4-0-1 Alch."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-5 Glue (glue storm line) or at least 2-0-4 Glue on Strong to slow big clumps."
-        },
-        {
-          phase: "late",
-          desc: "0-2-5 Spike Factory at the central exit; then add 0-2-4 Village to cover core towers."
-        },
-        {
-          phase: "late",
-          desc: "If money allows, add 0-2-5 Ice near exit for extra stall into the spikes."
-        }
-      ]
-    },
-
-    /* ========= A-Tier solid options ========= */
-
-    {
-      id: "brickell-generic-water",
-      name: "Brickell Carrier Fleet (Generic Water Maps)",
-      tier: "A",
-      hero: "Admiral Brickell",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable", "hard"],
-      mapTags: ["water_heavy"],
-      waterPreferred: "needs_water",
-      recommendedMaps: ["Spice Islands", "Off The Coast", "Peninsula", "Pat's Pond", "Resort"],
-      summary: "Brickell + Carrier Flagship + Subs; strong on almost any water-heavy track.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Open with 0-0-0 Sub(s) or 0-0-0 Boat depending on water position; get Brickell down once stable."
-        },
-        {
-          phase: "mid",
-          desc: "Rush 0-0-4 → 2-0-5 Carrier Flagship and a 2-0-4 Sub for MOABs."
-        },
-        {
-          phase: "late",
-          desc: "0-2-4 Village over fleet and optionally 0-0-5 Spike Factory for backline safety."
-        }
-      ]
-    },
-
-    {
-      id: "psi-slow-control",
-      name: "Psi Global Control Core",
-      tier: "A",
-      hero: "Psi",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["advanced", "expert", "multi_path"],
-      waterPreferred: "any",
-      recommendedMaps: ["Ravine", "Infernal", "Workshop"],
-      summary: "Psi’s global stun + strong slow/control core (Ice, Glue, Sniper) with low micro.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Start with a strong Dart/Ninja opening until Psi is affordable; place Psi centrally."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-5 Ice on main choke (Super Brittle) plus 2-0-5 Glue on Strong for MOAB slowdown."
-        },
-        {
-          phase: "late",
-          desc: "2-0-5 Sniper on Strong (Elite Sniper) for extra cash and MOAB damage; add Village as needed."
-        }
-      ]
-    },
-
-    {
-      id: "etienne-advanced-sky",
-      name: "Etienne Drone Sky Defense",
-      tier: "A",
-      hero: "Etienne",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["advanced", "multi_path"],
-      waterPreferred: "any",
-      recommendedMaps: ["High Finance", "Underground", "Another Brick"],
-      summary: "Etienne’s global drones plus a simple PoD or Sun Avatar core.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Dart + Ninja open, then drop Etienne in a safe spot as soon as affordable."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-5 Wizard (Prince of Darkness) or 2-0-3 Super → 2-0-4 Sun Avatar on long-sight tiles."
-        },
-        {
-          phase: "late",
-          desc: "Village for camo & damage boosts; small cluster of 0-2-4 Ninjas for cleanup."
-        }
-      ]
-    },
-
-    {
-      id: "nohero-dart-ninja-alch",
-      name: "No Hero Dart-Ninja-Alch Core",
-      tier: "A",
-      hero: "None",
-      microHeavy: false,
-      missionTags: ["chimps", "impoppable", "hard"],
-      mapTags: ["beginner", "intermediate"],
-      waterPreferred: "any",
-      recommendedMaps: ["Monkey Meadow", "Cubism", "Chutes"],
-      summary: "Hero-less, low-micro core focused on efficient Dart/Ninja/Alch fundamentals.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Triple Dart start or Dart + Ninja, positioned to hit long passes."
-        },
-        {
-          phase: "mid",
-          desc: "3-0-0 → 4-0-1 Alch on Strong buffing main damage tower (Ninja or Dart x-5)."
-        },
-        {
-          phase: "mid",
-          desc: "0-2-4 Ninja (Bloonjitsu) and 0-2-4 Wizard (Arcane Spike/PoD later) as core DPS."
-        },
-        {
-          phase: "late",
-          desc: "0-2-4 Village and 0-0-5 Spike Factory if track length allows."
-        }
-      ]
-    },
-
-    /* ========= Micro-heavy (toggled) ========= */
-
-    {
-      id: "corvus-abyss-water",
-      name: "Corvus Mermonkey Abyss",
-      tier: "A",
-      hero: "Corvus",
-      microHeavy: true,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["advanced", "expert", "water_heavy"],
-      waterPreferred: "needs_water",
-      recommendedMaps: ["Flooded Valley", "Spice Islands", "Off The Coast"],
-      summary: "Leans on Corvus’s mermonkey mechanics + Lord of the Abyss / Flagship; strong but shop/micro heavy.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Corvus down early with shop optimization; combine with 0-0-0 Sub or Boat to stabilize."
-        },
-        {
-          phase: "mid",
-          desc: "Focus Corvus shop usage to ramp water DPS (e.g., Lord of the Abyss / carrier synergies)."
-        },
-        {
-          phase: "late",
-          desc: "Round out with Village, Ice, and Glue as needed; expect some micro on shop items and placements."
-        }
-      ]
-    },
-
-    {
-      id: "geraldo-shop-utility",
-      name: "Geraldo Toolbox Control",
-      tier: "A",
-      hero: "Geraldo",
-      microHeavy: true,
-      missionTags: ["chimps", "impoppable", "hard"],
-      mapTags: ["any"],
-      waterPreferred: "any",
-      recommendedMaps: ["Most maps, esp. Beginner/Intermediate"],
-      summary: "Geraldo’s shop items (genie, pickle, totems) make almost anything work, but require active management.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Use Geraldo’s items (shooting nails, road items) to support cheap Dart/Ninja openings."
-        },
-        {
-          phase: "mid",
-          desc: "Layer in main DPS (PoD, Sun Avatar, or Plasma Fan) and buff with pickles / genie as needed."
-        },
-        {
-          phase: "late",
-          desc: "Totems, genies and shop refresh micro keep lategame healthy. Strong but attention-intensive."
-        }
-      ]
-    },
-
-    {
-      id: "adora-temple-sacrifices",
-      name: "Adora Sun Temple Sacrifice Core",
-      tier: "A",
-      hero: "Adora",
-      microHeavy: true,
-      missionTags: ["chimps", "impoppable"],
-      mapTags: ["advanced", "expert"],
-      waterPreferred: "land_only",
-      recommendedMaps: ["Adora's Temple", "Sanctuary", "Dark Castle"],
-      summary: "Classic Adora + Temple / True Sun God route with heavy sacrifice planning and positioning.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Adora in central high-coverage spot; support with efficient Darts/Ninjas."
-        },
-        {
-          phase: "mid",
-          desc: "Build a 3-0-0 → 5-0-0 Super Monkey (Temple) in a place that will later cover most track, planning sacrifice categories."
-        },
-        {
-          phase: "late",
-          desc: "Execute full Temple/Sun God sacrifices. High power, but requires pathing knowledge and micro."
-        }
-      ]
-    },
-
-    /* ========= B-Tier situational ========= */
-
-    {
-      id: "pat-sun-avatar-flooded",
-      name: "Pat Sun Avatar Flooded Valley",
-      tier: "B",
-      hero: "Pat Fusty",
-      microHeavy: false,
-      missionTags: ["chimps"],
-      mapTags: ["expert", "water_heavy"],
-      waterPreferred: "needs_water",
-      recommendedMaps: ["Flooded Valley"],
-      summary: "Pat knockback with Sun Avatar + support; viable alternate to Brickell on Flooded Valley.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Pat near central path intersection so his knockbacks cover both lanes."
-        },
-        {
-          phase: "mid",
-          desc: "2-0-4 Sun Avatar on top of main intersection; support with Alchemist & Village."
-        },
-        {
-          phase: "late",
-          desc: "Subs / Boats for extra BAD damage; 0-2-5 Ice if platforming allows."
-        }
-      ]
-    },
-
-    {
-      id: "gwen-boss-bombs",
-      name: "Gwen Boss Bomb Core",
-      tier: "B",
-      hero: "Gwendolin",
-      microHeavy: false,
-      missionTags: ["boss"],
-      mapTags: ["beginner", "intermediate"],
-      waterPreferred: "any",
-      recommendedMaps: ["Monkey Meadow", "Cubism", "Bloonarius Prime"],
-      summary: "Gwen + bombardment core. Great on bosses where pure MOAB damage is key and leak risk is low.",
-      keyTowers: [
-        {
-          phase: "early",
-          desc: "Gwen early; Dart/Ninja to help anti-leak waves."
-        },
-        {
-          phase: "mid",
-          desc: "2-0-4 Bomb Shooters and 0-2-3 Glue for boss slow; 4-0-2 Alchs for buffs."
-        },
-        {
-          phase: "late",
-          desc: "Village + extra Bombs / Tack Zone as needed for later boss tiers."
-        }
-      ]
+      `;
     }
-  ];
 
-  /*****************
-   * UI WIRES      *
-   *****************/
+    function renderStrategies() {
+      const heroes = getSelectedHeroes();
+      const mapTraits = getSelectedMapTraits();
+      const mode = getSelectedMode();
+      const water = $("waterToggle").checked;
+      const includeMicro = $("microToggle").checked;
 
-  const heroInput = document.getElementById("hero-input");
-  const heroMulti = document.getElementById("hero-multi");
-  const mapSelect = document.getElementById("map-select");
-  const missionSelect = document.getElementById("mission-select");
-  const waterToggle = document.getElementById("water-toggle");
-  const microToggle = document.getElementById("micro-toggle");
-  const resultsEl = document.getElementById("results");
-  const matchCountEl = document.getElementById("match-count");
+      const filters = { heroes, mapTraits, mode, water, includeMicro };
 
-  const browseBuckets = {
-    S: document.getElementById("browse-s"),
-    A: document.getElementById("browse-a"),
-    B: document.getElementById("browse-b")
-  };
+      let filtered = STRATEGIES.filter(s => strategyMatchesFilters(s, filters));
 
-  let selectedHeroes = [];
+      // sort by tier, then by name
+      filtered.sort((a, b) => {
+        const diff = tierScore(b.tier) - tierScore(a.tier);
+        if (diff !== 0) return diff;
+        return a.name.localeCompare(b.name);
+      });
 
-  // ---- localStorage state ----
-  const STORAGE_KEY = "btd6PlannerStateV1";
+      let toRender = filtered;
+      if (activeTab === "suggested") {
+        toRender = filtered.slice(0, 5);
+      }
 
-  function saveState() {
-    try {
-      const state = {
-        heroes: selectedHeroes,
-        map: mapSelect.value || "",
-        mission: missionSelect.value || "",
-        water: !!waterToggle.checked,
-        micro: !!microToggle.checked
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (_) {
-      // fail silently; not critical
+      const container = $("strategiesList");
+      if (!toRender.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            No strategies match your filters.
+            Try relaxing hero/map constraints or enabling micro-heavy options.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = toRender.map(buildStrategyCard).join("");
     }
-  }
 
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const state = JSON.parse(raw);
-      if (!state || typeof state !== "object") return;
+    function resetFilters() {
+      const heroSel = $("heroSelect");
+      Array.from(heroSel.options).forEach(opt => (opt.selected = false));
+      $("mapName").value = "";
+      document
+        .querySelectorAll("#mapTraitsRow .pill")
+        .forEach(p => p.classList.remove("active"));
+      $("waterToggle").checked = false;
+      $("microToggle").checked = false;
+      $("modeSelect").value = "any";
+      activeTab = "suggested";
+      updateTabButtons();
+      renderStrategies();
+    }
 
-      // heroes
-      if (Array.isArray(state.heroes)) {
-        selectedHeroes = state.heroes.filter(h =>
-          HEROES.some(H => H.toLowerCase() === h.toLowerCase())
+    function updateTabButtons() {
+      document
+        .querySelectorAll(".tab-btn")
+        .forEach(btn =>
+          btn.classList.toggle("active", btn.dataset.tab === activeTab)
         );
-      }
-
-      // map
-      if (state.map && MAPS.some(m => m.name === state.map)) {
-        mapSelect.value = state.map;
-      }
-
-      // mission
-      if (state.mission && ["chimps","impoppable","hard","boss"].includes(state.mission)) {
-        missionSelect.value = state.mission;
-      }
-
-      // toggles
-      if (typeof state.water === "boolean") {
-        waterToggle.checked = state.water;
-      }
-      if (typeof state.micro === "boolean") {
-        microToggle.checked = state.micro;
-      }
-    } catch (_) {
-      // ignore parse errors
     }
-  }
 
-  // Populate map dropdown
-  function initMaps() {
-    const byDiff = { Beginner: [], Intermediate: [], Advanced: [], Expert: [], Other: [] };
-    MAPS.forEach(m => {
-      if (!byDiff[m.difficulty]) byDiff[m.difficulty] = [];
-      byDiff[m.difficulty].push(m);
-    });
-    for (const diff of ["Beginner", "Intermediate", "Advanced", "Expert"]) {
-      const groupMaps = byDiff[diff] || [];
-      if (!groupMaps.length) continue;
-      const optGroup = document.createElement("optgroup");
-      optGroup.label = diff;
-      groupMaps.forEach(m => {
+    // --- INIT ----------------------------------------------------------------
+
+    function initHeroes() {
+      const sel = $("heroSelect");
+      HEROES.forEach(h => {
         const opt = document.createElement("option");
-        opt.value = m.name;
-        opt.textContent = m.name + (m.hasWater ? " 🌊" : "");
-        optGroup.appendChild(opt);
+        opt.value = h.id;
+        opt.textContent = h.name;
+        sel.appendChild(opt);
       });
-      mapSelect.appendChild(optGroup);
     }
-  }
 
-  function renderHeroChips() {
-    // Remove existing chips (but not the input)
-    heroMulti.querySelectorAll(".chip").forEach(ch => ch.remove());
-    selectedHeroes.forEach(hero => {
-      const chip = document.createElement("span");
-      chip.className = "chip";
-      chip.textContent = hero;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = "×";
-      btn.addEventListener("click", () => {
-        selectedHeroes = selectedHeroes.filter(h => h !== hero);
-        renderHeroChips();
-        runFilter();
+    function initModes() {
+      const sel = $("modeSelect");
+      MODES.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.label;
+        sel.appendChild(opt);
       });
-      chip.appendChild(btn);
-      heroMulti.insertBefore(chip, heroInput);
-    });
-  }
-
-  function tryAddHeroFromInput() {
-    const raw = heroInput.value.trim();
-    if (!raw) return;
-    const match = HEROES.find(h => h.toLowerCase() === raw.toLowerCase());
-    if (match && !selectedHeroes.includes(match)) {
-      selectedHeroes.push(match);
-      renderHeroChips();
-      runFilter();
-    }
-    heroInput.value = "";
-  }
-
-  heroInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      tryAddHeroFromInput();
-    } else if (e.key === "Backspace" && !heroInput.value && selectedHeroes.length) {
-      // backspace when empty removes last hero
-      selectedHeroes.pop();
-      renderHeroChips();
-      runFilter();
-    }
-  });
-
-  heroInput.addEventListener("blur", () => {
-    tryAddHeroFromInput();
-  });
-
-  mapSelect.addEventListener("change", () => {
-    const name = mapSelect.value;
-    const mapObj = MAPS.find(m => m.name === name);
-    if (mapObj) {
-      waterToggle.checked = !!mapObj.hasWater;
-    }
-    runFilter();
-  });
-
-  missionSelect.addEventListener("change", runFilter);
-  waterToggle.addEventListener("change", runFilter);
-  microToggle.addEventListener("change", runFilter);
-
-  // Tab switching
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
-      document.querySelectorAll(".panel").forEach(p => {
-        p.classList.toggle("active", p.id === "panel-" + tab);
-      });
-    });
-  });
-
-  /*****************
-   * FILTER LOGIC  *
-   *****************/
-
-  function mapForName(name) {
-    return MAPS.find(m => m.name === name) || null;
-  }
-
-  function strategyMatchesFilters(strategy) {
-    const missionFilter = missionSelect.value;
-    const selectedMapName = mapSelect.value;
-    const includeWaterOnly = waterToggle.checked;
-    const includeMicroHeavy = microToggle.checked;
-
-    if (!includeMicroHeavy && strategy.microHeavy) {
-      return false;
     }
 
-    // Hero filter
-    if (selectedHeroes.length > 0) {
-      if (strategy.hero === "None") {
-        // allow only if "None" is explicitly selected
-        if (!selectedHeroes.includes("None")) return false;
-      } else if (!selectedHeroes.includes(strategy.hero)) {
-        return false;
-      }
-    }
-
-    // Mission filter
-    if (missionFilter && !strategy.missionTags.includes(missionFilter)) {
-      return false;
-    }
-
-    // Water filter: if checkbox off, hide strategies that really need water
-    if (!includeWaterOnly && strategy.waterPreferred === "needs_water") {
-      return false;
-    }
-
-    // Map filter is soft: we do NOT strictly require mapTags, but we can later score
-    if (selectedMapName) {
-      const mObj = mapForName(selectedMapName);
-      if (!mObj) return true;
-      // For “land_only” strategies, avoid purely water-only maps
-      if (strategy.waterPreferred === "land_only" && mObj.hasWater && (mObj.difficulty === "Advanced" || mObj.difficulty === "Expert")) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  function scoreStrategy(strategy) {
-    let score = 0;
-    const missionFilter = missionSelect.value;
-    const selectedMapName = mapSelect.value;
-    const includeWaterOnly = waterToggle.checked;
-
-    // Tier weight
-    if (strategy.tier === "S") score += 4;
-    else if (strategy.tier === "A") score += 2;
-    else score += 1;
-
-    // Hero match bonus
-    if (selectedHeroes.length > 0) {
-      if (selectedHeroes.includes(strategy.hero)) score += 3;
-      else if (strategy.hero === "None") score += 1;
-    }
-
-    // Mission tag bonus
-    if (missionFilter && strategy.missionTags.includes(missionFilter)) {
-      score += 2;
-    }
-
-    // Map difficulty & type bonus
-    if (selectedMapName) {
-      const mObj = mapForName(selectedMapName);
-      if (mObj) {
-        if (mObj.difficulty === "Expert" && strategy.mapTags.includes("expert")) score += 3;
-        if (mObj.difficulty === "Advanced" && strategy.mapTags.includes("advanced")) score += 2;
-        if (mObj.difficulty === "Beginner" && strategy.mapTags.includes("beginner")) score += 1;
-        if (strategy.recommendedMaps && strategy.recommendedMaps.includes(selectedMapName)) {
-          score += 3;
-        }
-      }
-    }
-
-    // Water synergy bonus
-    if (includeWaterOnly && strategy.waterPreferred === "needs_water") {
-      score += 3;
-    }
-
-    return score;
-  }
-
-  function runFilter() {
-    const filtered = STRATEGIES.filter(strategyMatchesFilters);
-    const withScore = filtered.map(s => ({ s, score: scoreStrategy(s) }));
-    withScore.sort((a, b) => b.score - a.score);
-
-    const top = withScore.slice(0, 5).map(x => x.s);
-
-    renderResults(top, filtered.length);
-    saveState();  // persist current state whenever filters evaluated
-  }
-
-  function renderResults(strategies, totalMatches) {
-    resultsEl.innerHTML = "";
-    if (!strategies.length) {
-      const div = document.createElement("div");
-      div.className = "empty-state";
-      div.innerHTML = "No matching strategies yet. Try relaxing filters or toggling water / micro options.";
-      resultsEl.appendChild(div);
-      matchCountEl.textContent = "";
-      return;
-    }
-
-    matchCountEl.textContent = `${totalMatches} matching strategies, showing top ${strategies.length}`;
-
-    strategies.forEach(strategy => {
-      const card = document.createElement("article");
-      card.className = "result-card";
-
-      const header = document.createElement("div");
-      header.className = "result-header";
-
-      const titleWrap = document.createElement("div");
-      titleWrap.className = "result-title";
-      titleWrap.innerHTML = `<span>${strategy.name}</span>`;
-
-      const subtitle = document.createElement("div");
-      subtitle.className = "result-subtitle";
-      subtitle.textContent = `${strategy.hero === "None" ? "No Hero" : strategy.hero} • Recommended: ${strategy.recommendedMaps.join(", ")}`;
-
-      const tier = document.createElement("span");
-      tier.className = "tier-pill";
-      tier.textContent = `${strategy.tier}-Tier`;
-
-      if (strategy.microHeavy) {
-        const mh = document.createElement("span");
-        mh.className = "tier-pill badge-danger";
-        mh.style.borderColor = "var(--danger)";
-        mh.style.background = "rgba(255,107,107,0.16)";
-        mh.textContent = "High-micro";
-        header.appendChild(mh);
-      }
-
-      header.appendChild(tier);
-      card.appendChild(titleWrap);
-      card.appendChild(subtitle);
-      card.appendChild(header);
-
-      if (strategy.summary) {
-        const p = document.createElement("p");
-        p.className = "small";
-        p.textContent = strategy.summary;
-        card.appendChild(p);
-      }
-
-      const tagsRow = document.createElement("div");
-      tagsRow.className = "tags";
-
-      const modeTag = document.createElement("span");
-      modeTag.className = "tag";
-      modeTag.textContent = `Modes: ${strategy.missionTags.join(", ")}`;
-      tagsRow.appendChild(modeTag);
-
-      if (strategy.mapTags && strategy.mapTags.length) {
-        const mapTag = document.createElement("span");
-        mapTag.className = "tag";
-        mapTag.textContent = `Map type: ${strategy.mapTags.join(" / ")}`;
-        tagsRow.appendChild(mapTag);
-      }
-
-      if (strategy.waterPreferred === "needs_water") {
-        const w = document.createElement("span");
-        w.className = "tag";
-        w.textContent = "Water-dependent";
-        tagsRow.appendChild(w);
-      }
-
-      card.appendChild(tagsRow);
-
-      // Tower phases
-      if (strategy.keyTowers && strategy.keyTowers.length) {
-        const phases = ["early", "mid", "late"];
-        phases.forEach(phase => {
-          const phaseItems = strategy.keyTowers.filter(t => t.phase === phase);
-          if (!phaseItems.length) return;
-          const label = document.createElement("div");
-          label.className = "phase-label";
-          label.textContent = phase.toUpperCase();
-          card.appendChild(label);
-
-          const ul = document.createElement("ul");
-          ul.className = "tower-list";
-          phaseItems.forEach(item => {
-            const li = document.createElement("li");
-            li.textContent = item.desc;
-            ul.appendChild(li);
-          });
-          card.appendChild(ul);
+    function initMapTraits() {
+      const row = $("mapTraitsRow");
+      MAP_TRAITS.forEach(mt => {
+        const span = document.createElement("span");
+        span.className = "pill";
+        span.textContent = mt.label;
+        span.dataset.id = mt.id;
+        span.addEventListener("click", () => {
+          span.classList.toggle("active");
+          renderStrategies();
         });
-      }
-
-      resultsEl.appendChild(card);
-    });
-  }
-
-  /*****************
-   * BROWSE VIEW   *
-   *****************/
-
-  function renderBrowse() {
-    for (const tier of ["S", "A", "B"]) {
-      const container = browseBuckets[tier];
-      container.innerHTML = "";
-      const list = STRATEGIES.filter(s => s.tier === tier);
-      if (!list.length) {
-        container.innerHTML = '<div class="small">Nothing in this tier yet.</div>';
-        continue;
-      }
-      list.forEach(strategy => {
-        const card = document.createElement("article");
-        card.className = "result-card";
-
-        const header = document.createElement("div");
-        header.className = "result-header";
-
-        const titleWrap = document.createElement("div");
-        titleWrap.className = "result-title";
-        titleWrap.textContent = strategy.name;
-
-        const subtitle = document.createElement("div");
-        subtitle.className = "result-subtitle";
-        subtitle.textContent = `${strategy.hero === "None" ? "No Hero" : strategy.hero} • Modes: ${strategy.missionTags.join(", ")}`;
-
-        header.appendChild(titleWrap);
-        header.appendChild(subtitle);
-        card.appendChild(header);
-
-        if (strategy.summary) {
-          const p = document.createElement("p");
-          p.className = "small";
-          p.textContent = strategy.summary;
-          card.appendChild(p);
-        }
-
-        const tagsRow = document.createElement("div");
-        tagsRow.className = "tags";
-        if (strategy.recommendedMaps && strategy.recommendedMaps.length) {
-          const rm = document.createElement("span");
-          rm.className = "tag";
-          rm.textContent = "Maps: " + strategy.recommendedMaps.slice(0, 3).join(", ") +
-            (strategy.recommendedMaps.length > 3 ? "…" : "");
-          tagsRow.appendChild(rm);
-        }
-        if (strategy.waterPreferred === "needs_water") {
-          const w = document.createElement("span");
-          w.className = "tag";
-          w.textContent = "Water-dependent";
-          tagsRow.appendChild(w);
-        }
-        if (strategy.microHeavy) {
-          const mh = document.createElement("span");
-          mh.className = "tag badge-danger";
-          mh.textContent = "High-micro";
-          tagsRow.appendChild(mh);
-        }
-        card.appendChild(tagsRow);
-
-        container.appendChild(card);
+        row.appendChild(span);
       });
     }
-  }
 
-  /*****************
-   * INIT          *
-   *****************/
+    function initTabs() {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.tab;
+          updateTabButtons();
+          renderStrategies();
+        });
+      });
+    }
 
-  initMaps();
-  loadState();       // restore hero/map/mode/toggle state
-  renderHeroChips();
-  renderBrowse();
-  runFilter();
-</script>
+    function initEvents() {
+      $("filterBtn").addEventListener("click", renderStrategies);
+      $("resetBtn").addEventListener("click", resetFilters);
+
+      $("heroSelect").addEventListener("change", renderStrategies);
+      $("modeSelect").addEventListener("change", renderStrategies);
+      $("waterToggle").addEventListener("change", renderStrategies);
+      $("microToggle").addEventListener("change", renderStrategies);
+      $("mapName").addEventListener("input", () => {
+        // Map name itself is informational for you; filters use traits.
+        // No re-filter on every keystroke necessary, but cheap enough:
+        renderStrategies();
+      });
+    }
+
+    function init() {
+      initHeroes();
+      initModes();
+      initMapTraits();
+      initTabs();
+      initEvents();
+      renderStrategies();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
 </body>
 </html>
