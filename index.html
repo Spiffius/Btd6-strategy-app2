@@ -263,7 +263,7 @@
     </h1>
     <div class="subtitle">
       Pick hero(s), map, hard mode, and map quirks. I’ll suggest up to five reasonably strong,
-      low-micro strategies. Toggle in the spicy stuff if you want Corvus/Gerald/VTSG nonsense.
+      low-micro strategies. Toggle in the spicy stuff if you want Geraldo/Corvus/Engi paragon shenanigans.
     </div>
 
     <div class="layout">
@@ -320,6 +320,9 @@
             <label class="hero-pill">
               <input type="checkbox" value="Captain Churchill" class="hero-checkbox" /> Churchill
             </label>
+            <label class="hero-pill">
+              <input type="checkbox" value="Silas" class="hero-checkbox" /> Silas
+            </label>
           </div>
           <div class="hint">Leave all unchecked if you’re open to any hero.</div>
         </div>
@@ -329,7 +332,7 @@
           <label for="mapSelect">Map</label>
           <select id="mapSelect">
             <option value="">Any map</option>
-            <!-- Maps are added by JS on load -->
+            <!-- Maps added by JS -->
           </select>
 
           <div id="mapInfoBox" class="map-info">
@@ -377,7 +380,7 @@
             </label>
           </div>
           <div class="hint">
-            These are manual “vibes” toggles. Use them when the map is being weird (Geared, Peninsula, Ravine, etc.).
+            These are manual “vibes” toggles. Use them when the map is being weird (Geared, Peninsula, Ravine, Tricky Tracks, etc.).
           </div>
         </div>
 
@@ -385,10 +388,10 @@
           <h3>Spice level</h3>
           <label class="pill">
             <input type="checkbox" id="microToggle" />
-            <span class="pill-label">Allow micro-heavy strategies (Geraldo, Corvus, temple sac, etc.)</span>
+            <span class="pill-label">Allow micro-heavy strategies (Geraldo, Corvus, Engi paragon, temple sac, etc.)</span>
           </label>
           <div class="hint">
-            Turn this on if you’re happy to ability-spam or babysit Geraldo shops and temple sacrifices.
+            Turn this on if you’re happy to ability-spam or babysit Overclock stacks and Geraldo shops.
           </div>
         </div>
 
@@ -411,7 +414,7 @@
   </div>
 
   <script>
-    // --- Base map list (names + difficulty, as before) ---
+    // --- Base map list (names + difficulty) ---
     const MAPS = [
       // Beginner
       { name: "Monkey Meadow", difficulty: "Beginner" },
@@ -502,6 +505,7 @@
       { name: "Dark Castle", difficulty: "Expert" },
       { name: "Muddy Puddles", difficulty: "Expert" },
       { name: "#Ouch", difficulty: "Expert" },
+      { name: "Tricky Tracks", difficulty: "Expert" },
 
       // Specials
       { name: "Protect The Yacht", difficulty: "Intermediate" },
@@ -509,207 +513,126 @@
     ];
 
     // --- Map terrain metadata (derived from Bloons Wiki + general knowledge) ---
-    // This is intentionally partial; maps not listed here will still work, but won't auto-tag.
     const MAP_TRAITS = {
       "Monkey Meadow": {
-        water: false,
-        multiPath: false,
-        los: true,   // trees on corners
-        short: false,
+        water: false, multiPath: false, los: true, short: false,
         description: "Beginner single-lane map with gentle bends, no water, mild LOS trees in the corners."
       },
       "Logs": {
-        water: false,
-        multiPath: false,
-        los: false,
-        short: false,
+        water: false, multiPath: false, los: false, short: false,
         description: "Long, looping track with excellent placement space and almost no LOS issues. Very forgiving."
       },
       "Cubism": {
-        water: false,
-        multiPath: true,
-        los: false,
-        short: false,
+        water: false, multiPath: true, los: false, short: false,
         description: "Four interwoven paths with generous space; feels like multi-lane but still very manageable."
       },
       "Spice Islands": {
-        water: true,
-        multiPath: true,
-        los: false,
-        short: false,
+        water: true, multiPath: true, los: false, short: false,
         description: "Ships-on-islands map with water all around and split paths that converge near the exit."
       },
       "Off The Coast": {
-        water: true,
-        multiPath: false,
-        los: false,
-        short: false,
+        water: true, multiPath: false, los: false, short: false,
         description: "Mostly water with a strip of land; boats and subs shine, land space is precious."
       },
       "Flooded Valley": {
-        water: true,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: true, multiPath: true, los: true, short: true,
         description: "Expert dam map with short, simultaneous lanes, heavy water, limited land, and LOS obstacles."
       },
       "Peninsula": {
-        water: true,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: true, multiPath: true, los: true, short: true,
         description: "Awkward peninsula layout with split lanes, tight build spots, and a lot of water."
       },
       "Pat's Pond": {
-        water: true,
-        multiPath: false,
-        los: false,
-        short: false,
+        water: true, multiPath: false, los: false, short: false,
         description: "Central pond surrounded by path; excellent for Brickell/Pat and water-centric strategies."
       },
       "Geared": {
-        water: false,
-        multiPath: false,
-        los: true,
-        short: true,
+        water: false, multiPath: false, los: true, short: true,
         description: "Rotating gear track; constantly shifts tower coverage, short effective path, lots of jank."
       },
       "Workshop": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: false, multiPath: true, los: true, short: true,
         description: "Multiple small lanes and heavy LOS blockers; space and sight-lines are both awkward."
       },
       "Bloody Puddles": {
-        water: false,
-        multiPath: true,
-        los: false,
-        short: true,
+        water: false, multiPath: true, los: false, short: true,
         description: "Five brutal short lanes, lots of entry points and very little reaction time."
       },
       "Muddy Puddles": {
-        water: false,
-        multiPath: true,
-        los: false,
-        short: true,
+        water: false, multiPath: true, los: false, short: true,
         description: "Four lanes with tight entry timings; similar idea to Bloody Puddles but slightly tamer."
       },
       "Ravine": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: false, multiPath: true, los: true, short: true,
         description: "Deep ravine with split paths and heavy LOS issues; DDTs are notoriously painful here."
       },
       "Dark Castle": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: false, multiPath: true, los: true, short: true,
         description: "Tight expert map with multiple lanes, sharp turns, and castle walls blocking LOS."
       },
       "Infernal": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: false, multiPath: true, los: true, short: true,
         description: "Two small platforms over lava with portals; nasty LOS and limited placement."
       },
       "Dark Dungeons": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: false, multiPath: true, los: true, short: true,
         description: "Labyrinthine dungeon with extreme LOS issues and pathing — Psi loves it, many others hate it."
       },
       "Cornfield": {
-        water: false,
-        multiPath: false,
-        los: true,
-        short: false,
+        water: false, multiPath: false, los: true, short: false,
         description: "Huge map but almost all of it is blocked by corn until you pay to clear it."
       },
       "Underground": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: false,
+        water: false, multiPath: true, los: true, short: false,
         description: "Above/below-ground paths with LOS shenanigans and tricky coverage."
       },
       "Encrypted": {
-        water: false,
-        multiPath: false,
-        los: true,
-        short: false,
+        water: false, multiPath: false, los: true, short: false,
         description: "Central ruins with strong LOS blockers; good for magic and global-range towers."
       },
       "Bazaar": {
-        water: true,
-        multiPath: true,
-        los: true,
-        short: true,
+        water: true, multiPath: true, los: true, short: true,
         description: "Split lanes passing through market stalls; water spots are useful but LOS is messy."
       },
       "Balance": {
-        water: false,
-        multiPath: true,
-        los: false,
-        short: false,
+        water: false, multiPath: true, los: false, short: false,
         description: "Symmetrical twin lanes, good for testing setups; no major LOS issues."
       },
       "Haunted": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: false,
+        water: false, multiPath: true, los: true, short: false,
         description: "Haunted house in the middle, with paths weaving around and through LOS blockers."
       },
       "Downstream": {
-        water: true,
-        multiPath: false,
-        los: false,
-        short: false,
+        water: true, multiPath: false, los: false, short: false,
         description: "River map with a clear land bridge and plenty of water for boats/subs."
       },
       "Lotus Island": {
-        water: true,
-        multiPath: false,
-        los: true,
-        short: false,
+        water: true, multiPath: false, los: true, short: false,
         description: "Island map with lotus pads and some LOS quirks; good water access."
       },
       "Water Park": {
-        water: true,
-        multiPath: true,
-        los: false,
-        short: false,
+        water: true, multiPath: true, los: false, short: false,
         description: "Amusement-park style with water slides and multiple watery lanes."
       },
       "Glacial Trail": {
-        water: true,
-        multiPath: true,
-        los: true,
-        short: true,
-        description: "Icy, slippery-feeling expert map with split paths, ice LOS, and water sections."
+        water: true, multiPath: true, los: true, short: true,
+        description: "Icy expert map with split paths, ice LOS, and water sections."
       },
       "Spa Pits": {
-        water: true,
-        multiPath: false,
-        los: false,
-        short: false,
+        water: true, multiPath: false, los: false, short: false,
         description: "Beginner map with hot springs; simple path but lots of water around it."
       },
       "Three Mines 'Round": {
-        water: false,
-        multiPath: true,
-        los: true,
-        short: false,
+        water: false, multiPath: true, los: true, short: false,
         description: "Beginner-level but with rotating mine carts and some LOS/spacing quirks."
+      },
+      "Tricky Tracks": {
+        water: false, multiPath: true, los: true, short: true,
+        description: "New expert map with six simultaneous train lanes that slow in the middle and speed up again; no water, lots of entrances, LOS blockers and a very punishing path layout."
       }
     };
 
-    // --- Strategy data (unchanged from previous version) ---
+    // --- Strategy data ---
     const STRATEGIES = [
       {
         id: "obyn_druid_wall_chimps",
@@ -843,7 +766,7 @@
       },
       {
         id: "brickell_carrier_fleet",
-        name: "Brickell + Carrier & Moab-Shred Fleet (Pure Water Fun)",
+        name: "Brickell + Carrier & MOAB-Shred Fleet (Pure Water Fun)",
         tier: "A",
         heroes: ["Admiral Brickell"],
         missions: ["Hard Standard", "Impoppable", "Double HP MOABs", "Any Hard"],
@@ -998,7 +921,327 @@
         ],
         notes: "Designed around surviving DDTs on Ravine without tearing your hair out on targeting micro."
       },
-      // Micro-heavy / “toggle-only” fun
+
+      /* === NEW LOW-MICRO META ARCHETYPES (v52-ish) === */
+
+      {
+        id: "sauda_relentless_glue_chimps",
+        name: "Sauda + Relentless Glue (Easiest CHIMPS Core)",
+        tier: "S",
+        heroes: ["Sauda"],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard", "Any Hard"],
+        mapDifficulties: ["Beginner", "Intermediate"],
+        mapTraits: ["short-path", "multi-path"],
+        microHeavy: false,
+        coreTowers: [
+          "Sauda on main intersection",
+          "Glue Gunner (0-2-4) → (0-2-5) Relentless Glue as main control",
+          "Wizard (2-0-3) → (2-0-4) for mass damage"
+        ],
+        supportTowers: [
+          "Alchemist (4-0-2) on Wizard cluster",
+          "Village (2-2-0) → (2-3-0) covering Sauda + Wizard",
+          "Optional: Spike Factory (0-2-5) at exit for extra safety"
+        ],
+        order: [
+          "Early: Sauda start, add 0-2-2 Glue on strong near front",
+          "Mid: Wizard to 2-0-3 then 2-0-4, Glue to 0-2-4",
+          "Late: Alch 4-0-2, Village 2-3-0, Glue to 0-2-5 if needed"
+        ],
+        notes: "From popular “easiest CHIMPS” videos; very friendly for newer CHIMPS runs on most beginner/intermediate maps."
+      },
+      {
+        id: "gwen_moar_glaives_boomer",
+        name: "Gwendolin + Moar Glaives Boomerang Core",
+        tier: "A",
+        heroes: ["Gwendolin"],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Beginner", "Intermediate"],
+        mapTraits: ["standard", "multi-path"],
+        microHeavy: false,
+        coreTowers: [
+          "Gwendolin near clumped track segment",
+          "Boomerang (4-2-0) Moar Glaives as main DPS",
+          "Second Boomerang (0-2-4) for extra mid-game damage"
+        ],
+        supportTowers: [
+          "Village (2-2-0) for jungle drums + camo if needed",
+          "Alchemist (4-0-2) on primary Boomer",
+          "Bomb Shooter (2-0-4) or (0-2-4) for round 63/76 clumps"
+        ],
+        order: [
+          "Early: 0-1-2 Boomer + Gwen for early clears",
+          "Mid: Upgrade primary Boomer to 4-2-0 Moar Glaives, add Alch",
+          "Late: Second Boomer 0-2-4, Village 2-2-0, Bomb 2-0-4 if needed"
+        ],
+        notes: "Gwen’s heat synergy with Boomerangs makes this a simple, map-flexible hard-mode/CHIMPS strat."
+      },
+      {
+        id: "grandmaster_ninja_shinobi",
+        name: "Grandmaster Ninja + Shinobi Wall",
+        tier: "S",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard", "Alternate Bloons Rounds", "Any Hard"],
+        mapDifficulties: ["Beginner", "Intermediate", "Advanced", "Expert"],
+        mapTraits: ["short-path", "multi-path", "limited-los-ok"],
+        microHeavy: false,
+        coreTowers: [
+          "Grandmaster Ninja (5-0-2)",
+          "8–20 Shinobi Ninjas (0-2-4) around it",
+          "Alchemist (4-0-2) on core cluster"
+        ],
+        supportTowers: [
+          "Village (2-3-0) → (2-5-0) on the Ninja pack",
+          "Glue 0-2-4 or Ice 0-2-4 for MOAB control",
+          "Optional: extra 0-2-4 Ninjas if money allows"
+        ],
+        order: [
+          "Early: 2-0-0 Ninja start, add second Ninja if needed",
+          "Mid: Alch 4-0-2, build 4–6 Shinobi (0-2-2→0-2-4)",
+          "Late: Upgrade core Ninja to 5-0-2, expand Shinobi count, add Village"
+        ],
+        notes: "Frequently cited as one of the strongest generic CHIMPS strats: scales hard into 90s and doesn’t require heavy micro."
+      },
+      {
+        id: "sotf_elite_sniper_combo",
+        name: "Spirit of the Forest + Elite Sniper/Defender",
+        tier: "A",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Intermediate", "Advanced"],
+        mapTraits: ["multi-path", "limited-los-ok"],
+        microHeavy: false,
+        coreTowers: [
+          "Spirit of the Forest (0-2-5 Druid)",
+          "Elite Sniper (2-0-5) or Elite Defender (0-2-5) Sniper",
+          "Alchemist (4-0-2) on Druid or Sniper depending on placement"
+        ],
+        supportTowers: [
+          "Village (2-3-0) covering core damage towers",
+          "Secondary Druid(s) 0-2-4 for extra DoT",
+          "Optional: Spike Factory (0-2-5) for BAD safety"
+        ],
+        order: [
+          "Early: standard efficient start (Dart/Ninja/Engi) into 0-2-4 Druid",
+          "Mid: Upgrade to Spirit of the Forest (0-2-5), add Sniper 2-0-3 → 2-0-5",
+          "Late: Add Village 2-3-0, extra Druids or Spike if needed"
+        ],
+        notes: "Popular “best CHIMPS strategy” combo: SotF handles bloon waves while Elite Sniper/Defender shreds MOAB-class bloons from anywhere on the map."
+      },
+      {
+        id: "etienne_permaspike_bomb_carrier",
+        name: "Etienne + Perma-Spike, Bomb Blitz & Carrier",
+        tier: "A",
+        heroes: ["Etienne"],
+        missions: ["Impoppable", "Hard Standard", "Double HP MOABs"],
+        mapDifficulties: ["Beginner", "Intermediate", "Advanced"],
+        mapTraits: ["standard", "water-heavy", "multi-path"],
+        microHeavy: false,
+        coreTowers: [
+          "Spike Factory (2-0-5) Perma-Spike at exit",
+          "Bomb Shooter (0-2-5) Bomb Blitz",
+          "Carrier Flagship (5-2-0) or (2-0-5) depending on map"
+        ],
+        supportTowers: [
+          "Etienne for global camo (no camo village needed)",
+          "Village (2-3-0) on Bomb + Carrier if possible",
+          "Sub 2-0-4 for extra global damage on water maps"
+        ],
+        order: [
+          "Early: Efficient starter (Ninja + Alch 3-0-0 or Sub start if water)",
+          "Mid: Place Etienne, then 0-2-4 Spike → 2-0-5 Perma-Spike",
+          "Late: Add Bomb 0-2-4 → 0-2-5, then Carrier Flagship with Village support"
+        ],
+        notes: "Reddit favourite “easy and consistent” template: Perma-Spike secures DDTs/round 100, Bomb Blitz and Carrier handle most waves."
+      },
+      {
+        id: "sauda_wiz_heli_combo",
+        name: "Sauda + Bottom Wiz + Top Heli (Beginner CHIMPS/Impoppable)",
+        tier: "A",
+        heroes: ["Sauda"],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Beginner", "Intermediate"],
+        mapTraits: ["standard"],
+        microHeavy: false,
+        coreTowers: [
+          "Wizard (5-0-2) or (5-2-0) as main caster carry",
+          "Heli (2-0-5) Apache Prime or (5-2-0) Comanche Commander",
+          "Sauda for strong early and mid-game cleanup"
+        ],
+        supportTowers: [
+          "Village (2-3-0) covering both Wiz + Heli if possible",
+          "Alchemist (4-2-0) buffing Wizard and/or Heli",
+          "Sniper (2-0-2 → 2-0-4) for extra BAD damage if needed"
+        ],
+        order: [
+          "Early: Sauda, then 0-2-2 Wizard for early damage",
+          "Mid: Upgrade Wiz toward 5-0-2 while placing Heli 2-0-3 → 2-0-5",
+          "Late: Village 2-3-0 and Alch 4-2-0, then polish with extra DPS"
+        ],
+        notes: "Based on highly upvoted Sauda+Wiz+Heli recommendations; handles most non-expert maps with minimal micro."
+      },
+      {
+        id: "ace_glue_ice_impoppable",
+        name: "Ace / Dartling + Glue & Ice (Impoppable Cleaner)",
+        tier: "B",
+        heroes: [],
+        missions: ["Impoppable", "Hard Standard"],
+        mapDifficulties: ["Beginner", "Intermediate"],
+        mapTraits: ["standard"],
+        microHeavy: true,
+        coreTowers: [
+          "Ace (2-0-5) or Dartling (2-0-5) as main late-game DPS",
+          "Glue (5-2-0) or (0-2-5) for MOAB/ceramic slow",
+          "Ice (0-1-5) or (2-0-5) for stall and extra damage"
+        ],
+        supportTowers: [
+          "Village (2-2-0) → (2-3-0) on Ace/Dartling if possible",
+          "Spike Factory (1-4-0) or (0-2-5) for round 100 insurance",
+          "Sniper 2-0-2 for round 40 MOAB insurance"
+        ],
+        order: [
+          "Early: Standard efficient start into 2-0-3 Ace or Dartling",
+          "Mid: Add Glue (0-2-4 → 5-2-0) and Ice (0-1-5)",
+          "Late: Upgrade Ace/Dartling to 2-0-5, add Village and safety Spikes"
+        ],
+        notes: "A strong Ace or Dartling plus Glue/Ice control makes round 98–100 much safer, at the cost of a bit of timing micro."
+      },
+      {
+        id: "pop_and_awe_mortar_chimps",
+        name: "Pop and Awe Mortar Control (High-Round CHIMPS)",
+        tier: "A",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable"],
+        mapDifficulties: ["Intermediate", "Advanced"],
+        mapTraits: ["multi-path", "limited-los-ok"],
+        microHeavy: false,
+        coreTowers: [
+          "Mortar (0-5-0) Pop and Awe as main round-stun and damage",
+          "Bomb Shooter (2-0-4) → (2-0-5) for MOAB clumps",
+          "Ninja (4-0-2) for general DPS and clean-up"
+        ],
+        supportTowers: [
+          "Village (2-3-0) on Mortar + Bomb if possible",
+          "Alch (4-0-2) on Ninja or Bomb",
+          "Glue 0-2-4 for extra ceramic slow"
+        ],
+        order: [
+          "Early: Ninja/Bomb start into 2-0-4 Bomb and 0-3-0 Mortar",
+          "Mid: Upgrade Mortar to 0-4-0 Artillery, then 0-5-0 Pop and Awe",
+          "Late: Village 2-3-0, Ninja 4-0-2, and extra Glue/Bomb as needed"
+        ],
+        notes: "Pop and Awe is widely praised as one of the best CHIMPS mortars; this strat leans on its huge control window to trivialize scary rounds like 95 and 98."
+      },
+
+      /* === ENGINEER / ICICLE IMPALE & SILAS ICE STRATS === */
+
+      {
+        id: "silas_icicle_wall",
+        name: "Silas Icicle Wall (Ice-Control CHIMPS)",
+        tier: "S",
+        heroes: ["Silas"],
+        missions: ["CHIMPS", "Impoppable", "Magic Only", "Any Hard"],
+        mapDifficulties: ["Intermediate", "Advanced", "Expert"],
+        mapTraits: ["multi-path", "limited-los-ok", "short-path"],
+        microHeavy: false,
+        coreTowers: [
+          "Ice Monkey (0-2-5) Icicle Impale with lead-popping (Metal Freeze/Silas synergy or MIB)",
+          "Ice Monkey (2-0-4) Snowstorm → (2-0-5) Absolute Zero for big slows/ability",
+          "Ninja (4-0-2) or Wizard (0-2-5) for main non-MOAB DPS"
+        ],
+        supportTowers: [
+          "Village (2-3-0) → (2-5-0) covering the ice cluster (MIB if needed)",
+          "Alchemist (4-0-2) on Ninja/Wizard",
+          "Glue Gunner (0-2-4) on strong for extra ceramic/DT slow"
+        ],
+        order: [
+          "Early: Silas and a strong starter (Ninja 2-0-0 or Wizard 0-2-2) near good track coverage",
+          "Mid: Get an Ice Monkey 0-2-4 and upgrade to 0-2-5 Icicle Impale; add Village 2-3-0 if you need MIB/camo help",
+          "Late: Add 2-0-4 → 2-0-5 Snowstorm/Absolute Zero, finish core DPS (4-0-2 Ninja or 0-2-5 PoD), and sprinkle Glue for DDT control"
+        ],
+        notes: "Built around Silas’s ice buff kit: Icicle Impale + Snowstorm/Absolute Zero become an absurd control wall, while your magic DPS cleans up. Great on nasty LOS/multi-lane maps like Underground, Dark Dungeons, Tricky Tracks, and Ravine."
+      },
+      {
+        id: "engi_sentry_icicle_anchor",
+        name: "Engi Sentry Champion + Icicle Impale Anchor",
+        tier: "A",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Intermediate", "Advanced"],
+        mapTraits: ["multi-path", "limited-los-ok"],
+        microHeavy: false,
+        coreTowers: [
+          "Engineer (5-2-0) Sentry Champion as primary DPS",
+          "Ice Monkey (0-2-5) Icicle Impale as MOAB/DDT slow and damage",
+          "Alchemist (4-0-2) on Engi"
+        ],
+        supportTowers: [
+          "Village (2-3-0) covering Engi + Ice (MIB if needed)",
+          "Glue (0-2-4) for extra slow, placed near Icicle Impale",
+          "Optional: Overclock Engi (4-0-2) upgrade if you don’t mind light ability usage"
+        ],
+        order: [
+          "Early: 1–2 efficient starters (Dart 0-2-3 / Engi 2-0-0) until you can afford a 2-0-3 Engi core",
+          "Mid: Upgrade Engi toward 5-2-0 Sentry Champion; add Alch 3-0-0 → 4-0-2",
+          "Late: Place Ice Monkey and upgrade to 0-2-5 Icicle Impale near a high-traffic spot, then add Village 2-3-0 and Glue 0-2-4"
+        ],
+        notes: "Sentry Champion does the generic heavy lifting, Icicle Impale handles DDTs/super ceramics. Handles Underground/Workshop-style layouts well without requiring crazy Overclock micro."
+      },
+      {
+        id: "engi_paragon_icicle_expert",
+        name: "Sentry Paragon + Icicle Impale (#Ouch / Tricky Tracks meme clear)",
+        tier: "A",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Expert"],
+        mapTraits: ["multi-path", "short-path", "limited-los-ok"],
+        microHeavy: true,
+        coreTowers: [
+          "Engineer Paragon (Sentry Paragon) as the main late-game DPS",
+          "Ice Monkey (0-2-5) Icicle Impale positioned to hit as many lanes as possible",
+          "Alchemist (4-0-2) and/or Overclock (4-0-2) backing Engi pre-paragon"
+        ],
+        supportTowers: [
+          "Village (2-5-0) on Engi/Ice for jungle drums + primary/ice support",
+          "Glue (0-2-4) or (0-2-5) for extra slow on multi-lane entries",
+          "Optional: Spike Factory (0-2-5) at one of the exits as a panic buffer"
+        ],
+        order: [
+          "Early: Normal efficient start (Dart/Ninja/Engi) into 3-0-0 → 4-2-0 Engi core and a 0-2-4 Ice",
+          "Mid: Upgrade Engi to high-tier sentries (5-x-x line) and build up extra Engis for Paragon degree; keep Ice at 0-2-5 for DDT control",
+          "Late: Convert to Sentry Paragon, keep Icicle Impale on a key choke, and add Village/Glue/Spikes as needed for safety"
+        ],
+        notes: "Inspired by expert-map clears that combine ridiculous Engi paragon DPS with Icicle Impale’s stall. Very strong but also overkill and micro/plan heavy—only shows up if you enable micro-heavy strategies."
+      },
+
+      /* === FUN / MICRO-HEAVY STRATS (existing) === */
+
+      {
+        id: "total_transformation_druid_army",
+        name: "Total Transformation + Druid Army",
+        tier: "A",
+        heroes: [],
+        missions: ["CHIMPS", "Impoppable", "Hard Standard"],
+        mapDifficulties: ["Intermediate", "Advanced"],
+        mapTraits: ["standard"],
+        microHeavy: true,
+        coreTowers: [
+          "Engineer (0-5-0) Total Transformation",
+          "5–10 Druids (0-1-3 or 0-2-3) to be transformed",
+          "Alchemist (4-0-2) on Engi"
+        ],
+        supportTowers: [
+          "Village (2-3-0) on Engi + Druid pack",
+          "Extra Druid(s) or Ninja for in-between ability downtime",
+          "Optional: Spike Factory (0-2-5) for safety"
+        ],
+        order: [
+          "Early: Normal efficient start (Dart/Ninja/Engi) into few low-tier Druids",
+          "Mid: Place Engineer and upgrade to 0-5-0 Total Transformation",
+          "Late: Add more Druids in range, Village, and Alch; time TT ability on big waves"
+        ],
+        notes: "Featured in “underrated combo” content; very strong once online but requires paying attention to ability timing and building a good Druid swarm."
+      },
       {
         id: "geraldo_vtsg_temple",
         name: "Geraldo VTSG + Temple Sacrifice Playground",
@@ -1057,9 +1300,7 @@
       var checkboxes = document.querySelectorAll(".hero-checkbox");
       var heroes = [];
       for (var i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked) {
-          heroes.push(checkboxes[i].value);
-        }
+        if (checkboxes[i].checked) heroes.push(checkboxes[i].value);
       }
       return heroes;
     }
@@ -1098,10 +1339,8 @@
     }
 
     function updateMapInfo(mapName) {
-      var infoBox = document.getElementById("mapInfoBox");
       var textEl = document.getElementById("mapInfoText");
       var tagsEl = document.getElementById("mapInfoTags");
-
       tagsEl.innerHTML = "";
 
       if (!mapName) {
@@ -1135,14 +1374,12 @@
 
       textEl.textContent = summary;
 
-      // Auto-tag toggles only if we have traits
       if (traits) {
         document.getElementById("waterToggle").checked = !!traits.water;
         document.getElementById("multiPathToggle").checked = !!traits.multiPath;
         document.getElementById("losToggle").checked = !!traits.los;
         document.getElementById("shortPathToggle").checked = !!traits.short;
 
-        // Build chip tags
         var tlist = [];
         if (traits.water) tlist.push("Water-heavy");
         if (traits.multiPath) tlist.push("Multi-path / split lanes");
@@ -1157,7 +1394,6 @@
           tagsEl.appendChild(span);
         });
       } else {
-        // No traits; leave toggles as user set them
         var span = document.createElement("span");
         span.className = "map-info-tag";
         span.textContent = "Manual tags only for this map";
@@ -1250,10 +1486,10 @@
       });
 
       var top = candidates.slice(0, 5);
-      renderResults(top, mapName, mission, selectedHeroes);
+      renderResults(top);
     }
 
-    function renderResults(strategies, mapName, mission, heroes) {
+    function renderResults(strategies) {
       var container = document.getElementById("results");
       container.innerHTML = "";
 
@@ -1365,12 +1601,9 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       populateMapSelect();
-      var btn = document.getElementById("recommendBtn");
-      btn.addEventListener("click", recommendStrategies);
-
-      var mapSelect = document.getElementById("mapSelect");
-      mapSelect.addEventListener("change", function () {
-        updateMapInfo(mapSelect.value);
+      document.getElementById("recommendBtn").addEventListener("click", recommendStrategies);
+      document.getElementById("mapSelect").addEventListener("change", function () {
+        updateMapInfo(this.value);
       });
     });
   </script>
