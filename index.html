@@ -414,7 +414,7 @@
   </div>
 
   <script>
-    // --- Base map list (names + difficulty) ---
+    // --- Map list ---
     const MAPS = [
       // Beginner
       { name: "Monkey Meadow", difficulty: "Beginner" },
@@ -507,12 +507,12 @@
       { name: "#Ouch", difficulty: "Expert" },
       { name: "Tricky Tracks", difficulty: "Expert" },
 
-      // Specials
+      // Specials / fun
       { name: "Protect The Yacht", difficulty: "Intermediate" },
       { name: "Blons", difficulty: "Expert" }
     ];
 
-    // --- Map terrain metadata (derived from Bloons Wiki + general knowledge) ---
+    // --- Map terrain metadata ---
     const MAP_TRAITS = {
       "Monkey Meadow": {
         water: false, multiPath: false, los: true, short: false,
@@ -628,11 +628,11 @@
       },
       "Tricky Tracks": {
         water: false, multiPath: true, los: true, short: true,
-        description: "New expert map with six simultaneous train lanes that slow in the middle and speed up again; no water, lots of entrances, LOS blockers and a very punishing path layout."
+        description: "New expert map with six simultaneous lanes that slow in the middle and speed up again; no water, lots of entrances, LOS blockers and a very punishing path layout."
       }
     };
 
-    // --- Strategy data ---
+    // --- Strategy data (B-tier and above, with corrected paths) ---
     const STRATEGIES = [
       {
         id: "obyn_druid_wall_chimps",
@@ -644,21 +644,21 @@
         mapTraits: ["standard", "multi-path", "limited-los-ok"],
         microHeavy: false,
         coreTowers: [
-          "5–8x Spirit of the Forest Druids (0-2-5 / 0-3-2 mix)",
-          "Alchemist (4-0-2) buffing main Druids",
+          "5–8 Druids (0-2-4 Poplust / 0-2-5 Avatar of Wrath mix) as the main wall",
+          "Alchemist (4-0-2) buffing the main Druid cluster",
           "Prince of Darkness (0-0-5) or Archmage (0-2-5) for clean-up"
         ],
         supportTowers: [
-          "Village (2-3-0) → (2-5-0) for jungle drums + primary/ability support",
-          "Village (0-2-5) for camo/primary buffs if using primary-damage mix",
-          "Optional: Spike Factory (0-2-5) as safety net"
+          "Village (2-3-0) → (2-5-0) for attack speed and jungle drums/primary support",
+          "Village (0-2-5) for primary support if you mix in more primary towers",
+          "Optional: Spike Factory (0-2-5) for a safety net"
         ],
         order: [
-          "Early: Obyn near strong bend, 2–3 2-0-2 Druids",
-          "Mid: Add Alch 3-0-0 → 4-0-2, expand to 5+ Druids, get Village 2-2-0",
-          "Late: Upgrade main Druid to 0-2-5, add PoD/Archmage, second Village (2-3-0→2-5-0)"
+          "Early: Obyn near a strong bend, 2–3 2-0-2 Druids to get going",
+          "Mid: Add Alch 3-0-0 → 4-0-2, expand to 5+ Poplust Druids (0-2-4), get Village 2-2-0",
+          "Late: Upgrade one Druid to 0-2-5 Avatar of Wrath, add PoD/Archmage and second Village (2-3-0→2-5-0)"
         ],
-        notes: "Solid all-rounder for non-extreme maps with decent bends. Weak on ultra short paths or maps with horrific LOS like Dark Dungeons."
+        notes: "Classic Obyn/Druid CHIMPS shell. Crosspaths (extra range vs. pierce) are approximate; different guides tweak them slightly."
       },
       {
         id: "sauda_ninja_alch_abr",
@@ -670,7 +670,7 @@
         mapTraits: ["short-path", "limited-los-ok"],
         microHeavy: false,
         coreTowers: [
-          "Hero Sauda centered on main intersection",
+          "Sauda centered on main intersection",
           "Ninja (4-0-2) into (5-0-2) if needed",
           "Alchemist (4-0-2) buffing Sauda + Ninja"
         ],
@@ -684,7 +684,7 @@
           "Mid: Add 3-0-0 → 4-0-2 Alch, then 4-0-2 Ninja",
           "Late: Village 2-2-0, upgrade Ninja to 5-0-2, add Glue 0-2-4 / Sniper as needed"
         ],
-        notes: "Shines on short and ABR-biased maps where early pressure is nasty (e.g. Chutes, Rake)."
+        notes: "Shines on short and ABR-biased maps where early pressure is nasty (Chutes, Rake, etc.)."
       },
       {
         id: "etienne_double_sub_water",
@@ -696,7 +696,7 @@
         mapTraits: ["water-heavy", "multi-path"],
         microHeavy: false,
         coreTowers: [
-          "2x Submarine (2-0-4) → later one 2-0-5",
+          "2x Submarine (2-0-4) → later one 2-0-5 Sub Commander or First Strike depending on map",
           "Alchemist (4-0-2) for sub buffs",
           "Etienne for global camo once leveled"
         ],
@@ -814,7 +814,7 @@
           "Mid: 0-2-2 Wizard → 0-2-5 PoD, Ninja 4-0-2",
           "Late: Add Alch, Village, and glue/ice as needed"
         ],
-        notes: "Good when LOS really sucks (e.g. Dark Dungeons, Encrypted, Covered Garden), as Psi ignores a lot of it."
+        notes: "Good when LOS really sucks (Dark Dungeons, Encrypted, Covered Garden): Psi ignores a lot of it."
       },
       {
         id: "dark_castle_obyn_druid",
@@ -864,7 +864,7 @@
         order: [
           "Early: Ninja start + basic support (Dart/Boomer)",
           "Mid: Etienne, Alch 4-0-2, Ninja 4-0-2, Wizard 0-2-4",
-          "Late: Village 2-3-0, PoD or 2-0-4 Wizard, optional Spactory"
+          "Late: Village 2-3-0, PoD (0-2-5) or 2-0-4 Wizard, optional Spactory"
         ],
         notes: "Aimed at maps like Workshop, Quad, Geared where coverage and path splits are annoying."
       },
@@ -879,7 +879,7 @@
         microHeavy: false,
         coreTowers: [
           "Sauda at highest-impact junction",
-          "2–3 Wizards (2-0-3) Fireball/Wall of Fire",
+          "2–3 Wizards (2-0-3) Wall of Fire spam",
           "Glue Gunner (0-2-4)"
         ],
         supportTowers: [
@@ -936,7 +936,7 @@
         coreTowers: [
           "Sauda on main intersection",
           "Glue Gunner (0-2-4) → (0-2-5) Relentless Glue as main control",
-          "Wizard (2-0-3) → (2-0-4) for mass damage"
+          "Wizard (2-0-3) → (2-0-4) as mass damage"
         ],
         supportTowers: [
           "Alchemist (4-0-2) on Wizard cluster",
@@ -948,7 +948,7 @@
           "Mid: Wizard to 2-0-3 then 2-0-4, Glue to 0-2-4",
           "Late: Alch 4-0-2, Village 2-3-0, Glue to 0-2-5 if needed"
         ],
-        notes: "From popular “easiest CHIMPS” videos; very friendly for newer CHIMPS runs on most beginner/intermediate maps."
+        notes: "From “easiest CHIMPS” style guides. Crosspaths are standard but not sacred; some versions skew more into 0-3-2 Glue."
       },
       {
         id: "gwen_moar_glaives_boomer",
@@ -974,7 +974,7 @@
           "Mid: Upgrade primary Boomer to 4-2-0 Moar Glaives, add Alch",
           "Late: Second Boomer 0-2-4, Village 2-2-0, Bomb 2-0-4 if needed"
         ],
-        notes: "Gwen’s heat synergy with Boomerangs makes this a simple, map-flexible hard-mode/CHIMPS strat."
+        notes: "Very common Gwen+Boomer shell. Crosspaths approximate but follow the usual Moar Glaives meta."
       },
       {
         id: "grandmaster_ninja_shinobi",
@@ -1000,7 +1000,7 @@
           "Mid: Alch 4-0-2, build 4–6 Shinobi (0-2-2→0-2-4)",
           "Late: Upgrade core Ninja to 5-0-2, expand Shinobi count, add Village"
         ],
-        notes: "Frequently cited as one of the strongest generic CHIMPS strats: scales hard into 90s and doesn’t require heavy micro."
+        notes: "Frequently cited as one of the strongest generic CHIMPS strats. Shinobi crosspaths vary slightly per guide; this uses a common 0-2-4 focus."
       },
       {
         id: "sotf_elite_sniper_combo",
@@ -1012,8 +1012,8 @@
         mapTraits: ["multi-path", "limited-los-ok"],
         microHeavy: false,
         coreTowers: [
-          "Spirit of the Forest (0-2-5 Druid)",
-          "Elite Sniper (2-0-5) or Elite Defender (0-2-5) Sniper",
+          "Druid (0-5-2) Spirit of the Forest as map-wide DoT",
+          "Elite Sniper (2-0-5) or Elite Defender (0-2-5) Sniper as MOAB shred",
           "Alchemist (4-0-2) on Druid or Sniper depending on placement"
         ],
         supportTowers: [
@@ -1023,10 +1023,10 @@
         ],
         order: [
           "Early: standard efficient start (Dart/Ninja/Engi) into 0-2-4 Druid",
-          "Mid: Upgrade to Spirit of the Forest (0-2-5), add Sniper 2-0-3 → 2-0-5",
+          "Mid: Upgrade to Spirit of the Forest (0-5-2), add Sniper 2-0-3 → 2-0-5 or 0-2-5",
           "Late: Add Village 2-3-0, extra Druids or Spike if needed"
         ],
-        notes: "Popular “best CHIMPS strategy” combo: SotF handles bloon waves while Elite Sniper/Defender shreds MOAB-class bloons from anywhere on the map."
+        notes: "Vague in sources whether the Druid crosspath should favour extra range or more attack speed; this version uses 0-5-2 as a compromise."
       },
       {
         id: "etienne_permaspike_bomb_carrier",
@@ -1040,10 +1040,10 @@
         coreTowers: [
           "Spike Factory (2-0-5) Perma-Spike at exit",
           "Bomb Shooter (0-2-5) Bomb Blitz",
-          "Carrier Flagship (5-2-0) or (2-0-5) depending on map"
+          "Carrier Flagship (2-0-5) or (5-2-0) depending on map"
         ],
         supportTowers: [
-          "Etienne for global camo (no camo village needed)",
+          "Etienne for global camo (no camo Village needed)",
           "Village (2-3-0) on Bomb + Carrier if possible",
           "Sub 2-0-4 for extra global damage on water maps"
         ],
@@ -1052,7 +1052,7 @@
           "Mid: Place Etienne, then 0-2-4 Spike → 2-0-5 Perma-Spike",
           "Late: Add Bomb 0-2-4 → 0-2-5, then Carrier Flagship with Village support"
         ],
-        notes: "Reddit favourite “easy and consistent” template: Perma-Spike secures DDTs/round 100, Bomb Blitz and Carrier handle most waves."
+        notes: "Common meta pattern: Perma-Spike secures 95–100, Bomb Blitz and Carrier handle most waves. Crosspaths are slightly approximate by source."
       },
       {
         id: "sauda_wiz_heli_combo",
@@ -1064,7 +1064,7 @@
         mapTraits: ["standard"],
         microHeavy: false,
         coreTowers: [
-          "Wizard (5-0-2) or (5-2-0) as main caster carry",
+          "Wizard (0-2-5) Prince of Darkness or (2-0-5) Archmage as main caster carry",
           "Heli (2-0-5) Apache Prime or (5-2-0) Comanche Commander",
           "Sauda for strong early and mid-game cleanup"
         ],
@@ -1075,10 +1075,10 @@
         ],
         order: [
           "Early: Sauda, then 0-2-2 Wizard for early damage",
-          "Mid: Upgrade Wiz toward 5-0-2 while placing Heli 2-0-3 → 2-0-5",
+          "Mid: Upgrade Wiz toward either 0-2-5 PoD or 2-0-5 Archmage, while placing Heli 2-0-3 → 2-0-5",
           "Late: Village 2-3-0 and Alch 4-2-0, then polish with extra DPS"
         ],
-        notes: "Based on highly upvoted Sauda+Wiz+Heli recommendations; handles most non-expert maps with minimal micro."
+        notes: "Vague in some sources whether PoD or Archmage is the core; this entry keeps both options and notes approximate crosspaths."
       },
       {
         id: "ace_glue_ice_impoppable",
@@ -1091,7 +1091,7 @@
         microHeavy: true,
         coreTowers: [
           "Ace (2-0-5) or Dartling (2-0-5) as main late-game DPS",
-          "Glue (5-2-0) or (0-2-5) for MOAB/ceramic slow",
+          "Glue (0-2-5) Bloon Solver or (0-5-2) Super Glue depending on taste",
           "Ice (0-1-5) or (2-0-5) for stall and extra damage"
         ],
         supportTowers: [
@@ -1101,10 +1101,10 @@
         ],
         order: [
           "Early: Standard efficient start into 2-0-3 Ace or Dartling",
-          "Mid: Add Glue (0-2-4 → 5-2-0) and Ice (0-1-5)",
+          "Mid: Add Glue 0-2-4 → 0-2-5 or 0-5-2 and Ice 0-1-5",
           "Late: Upgrade Ace/Dartling to 2-0-5, add Village and safety Spikes"
         ],
-        notes: "A strong Ace or Dartling plus Glue/Ice control makes round 98–100 much safer, at the cost of a bit of timing micro."
+        notes: "Glue/Ice crosspaths here are approximate; Reddit builds differ slightly. The important part is “big slow + strong main DPS”."
       },
       {
         id: "pop_and_awe_mortar_chimps",
@@ -1130,7 +1130,7 @@
           "Mid: Upgrade Mortar to 0-4-0 Artillery, then 0-5-0 Pop and Awe",
           "Late: Village 2-3-0, Ninja 4-0-2, and extra Glue/Bomb as needed"
         ],
-        notes: "Pop and Awe is widely praised as one of the best CHIMPS mortars; this strat leans on its huge control window to trivialize scary rounds like 95 and 98."
+        notes: "Pop and Awe is widely praised as one of the best CHIMPS mortars."
       },
 
       /* === ENGINEER / ICICLE IMPALE & SILAS ICE STRATS === */
@@ -1145,21 +1145,21 @@
         mapTraits: ["multi-path", "limited-los-ok", "short-path"],
         microHeavy: false,
         coreTowers: [
-          "Ice Monkey (0-2-5) Icicle Impale with lead-popping (Metal Freeze/Silas synergy or MIB)",
-          "Ice Monkey (2-0-4) Snowstorm → (2-0-5) Absolute Zero for big slows/ability",
+          "Ice Monkey (0-2-5) Icicle Impale with lead-popping via Silas’s buffs or MIB",
+          "Ice Monkey (0-4-2) Snowstorm → (0-5-2) Absolute Zero for big slows/ability",
           "Ninja (4-0-2) or Wizard (0-2-5) for main non-MOAB DPS"
         ],
         supportTowers: [
           "Village (2-3-0) → (2-5-0) covering the ice cluster (MIB if needed)",
           "Alchemist (4-0-2) on Ninja/Wizard",
-          "Glue Gunner (0-2-4) on strong for extra ceramic/DT slow"
+          "Glue Gunner (0-2-4) on strong for extra ceramic/DDT slow"
         ],
         order: [
           "Early: Silas and a strong starter (Ninja 2-0-0 or Wizard 0-2-2) near good track coverage",
           "Mid: Get an Ice Monkey 0-2-4 and upgrade to 0-2-5 Icicle Impale; add Village 2-3-0 if you need MIB/camo help",
-          "Late: Add 2-0-4 → 2-0-5 Snowstorm/Absolute Zero, finish core DPS (4-0-2 Ninja or 0-2-5 PoD), and sprinkle Glue for DDT control"
+          "Late: Add 0-4-2 → 0-5-2 Snowstorm/Absolute Zero, finish core DPS (4-0-2 Ninja or 0-2-5 PoD), and sprinkle Glue for DDT control"
         ],
-        notes: "Built around Silas’s ice buff kit: Icicle Impale + Snowstorm/Absolute Zero become an absurd control wall, while your magic DPS cleans up. Great on nasty LOS/multi-lane maps like Underground, Dark Dungeons, Tricky Tracks, and Ravine."
+        notes: "Built around Silas’s ice buff kit. Crosspaths on Icicle/Absolute Zero are conventional but not unique; this is a standard variant."
       },
       {
         id: "engi_sentry_icicle_anchor",
@@ -1177,15 +1177,15 @@
         ],
         supportTowers: [
           "Village (2-3-0) covering Engi + Ice (MIB if needed)",
-          "Glue (0-2-4) for extra slow, placed near Icicle Impale",
-          "Optional: Overclock Engi (4-0-2) upgrade if you don’t mind light ability usage"
+          "Glue (0-2-4) for extra slow, placed near Icicle Impale choke",
+          "Optional: Overclock (0-4-2) on Engi if you don’t mind light ability usage"
         ],
         order: [
           "Early: 1–2 efficient starters (Dart 0-2-3 / Engi 2-0-0) until you can afford a 2-0-3 Engi core",
           "Mid: Upgrade Engi toward 5-2-0 Sentry Champion; add Alch 3-0-0 → 4-0-2",
           "Late: Place Ice Monkey and upgrade to 0-2-5 Icicle Impale near a high-traffic spot, then add Village 2-3-0 and Glue 0-2-4"
         ],
-        notes: "Sentry Champion does the generic heavy lifting, Icicle Impale handles DDTs/super ceramics. Handles Underground/Workshop-style layouts well without requiring crazy Overclock micro."
+        notes: "Combines raw Sentry Champion DPS with Icicle Impale’s stall. Overclock usage is optional; ignoring it keeps micro low."
       },
       {
         id: "engi_paragon_icicle_expert",
@@ -1199,11 +1199,11 @@
         coreTowers: [
           "Engineer Paragon (Sentry Paragon) as the main late-game DPS",
           "Ice Monkey (0-2-5) Icicle Impale positioned to hit as many lanes as possible",
-          "Alchemist (4-0-2) and/or Overclock (4-0-2) backing Engi pre-paragon"
+          "Alchemist (4-0-2) and/or Overclock (0-4-2) backing Engi pre-paragon"
         ],
         supportTowers: [
           "Village (2-5-0) on Engi/Ice for jungle drums + primary/ice support",
-          "Glue (0-2-4) or (0-2-5) for extra slow on multi-lane entries",
+          "Glue (0-2-5) or (0-5-2) for extra slow on multi-lane entries",
           "Optional: Spike Factory (0-2-5) at one of the exits as a panic buffer"
         ],
         order: [
@@ -1211,10 +1211,10 @@
           "Mid: Upgrade Engi to high-tier sentries (5-x-x line) and build up extra Engis for Paragon degree; keep Ice at 0-2-5 for DDT control",
           "Late: Convert to Sentry Paragon, keep Icicle Impale on a key choke, and add Village/Glue/Spikes as needed for safety"
         ],
-        notes: "Inspired by expert-map clears that combine ridiculous Engi paragon DPS with Icicle Impale’s stall. Very strong but also overkill and micro/plan heavy—only shows up if you enable micro-heavy strategies."
+        notes: "Based on expert-map clears combining Engi Paragon with Icicle Impale stall. Degree/Overclock details differ by guide; this is a high-level template."
       },
 
-      /* === FUN / MICRO-HEAVY STRATS (existing) === */
+      /* === FUN / MICRO-HEAVY STRATS === */
 
       {
         id: "total_transformation_druid_army",
@@ -1236,11 +1236,11 @@
           "Optional: Spike Factory (0-2-5) for safety"
         ],
         order: [
-          "Early: Normal efficient start (Dart/Ninja/Engi) into few low-tier Druids",
+          "Early: Normal efficient start (Dart/Ninja/Engi) into a few low-tier Druids",
           "Mid: Place Engineer and upgrade to 0-5-0 Total Transformation",
           "Late: Add more Druids in range, Village, and Alch; time TT ability on big waves"
         ],
-        notes: "Featured in “underrated combo” content; very strong once online but requires paying attention to ability timing and building a good Druid swarm."
+        notes: "Underrated but very micro-heavy; you need to time TT for big rounds (63, 76, 95, 98)."
       },
       {
         id: "geraldo_vtsg_temple",
@@ -1266,7 +1266,7 @@
           "Mid: Build sac categories, Sun Temple, Geraldo shop items for buffs",
           "Late: True Sun God, optional VTSG, support buffs"
         ],
-        notes: "Incredible power ceiling, but micro-intensive and very planning-heavy. Only appears if you enable the micro toggle."
+        notes: "Exact sac composition varies heavily between guides; this entry assumes standard full-category sac for max buffs."
       },
       {
         id: "corvus_ability_blast",
@@ -1292,7 +1292,7 @@
           "Mid: Start using Corvus rituals on key waves",
           "Late: Upgrade to T5s, aggressively chain abilities"
         ],
-        notes: "Fun for special Netflix/Quest style content where ability spam is rewarded; not recommended if you hate timing windows."
+        notes: "Used in some Netflix/quest-style challenges. Ability timings and exact gear vary per video; this is a high-level pattern."
       }
     ];
 
